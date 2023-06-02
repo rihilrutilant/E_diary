@@ -15,6 +15,7 @@ const Fees_set = require("../Models/Fees_Set_Model")
 const Homework = require("../../Teachers/Models/Homework_Model")
 const Classes = require("../../Classes/Models/Class_module")
 const Material = require("../../Teachers/Models/Materials_Model")
+const Events_photoes = require("../../Image_Middleware/Event_photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/', async (req, res) => {
@@ -225,7 +226,7 @@ router.post('/get_all_eventes', fetchadmin, async (req, res) => {
             return res.status(400).json({ success, error: "Sorry U should ligin first" })
         }
         const allevents = await Events.find();
-        res.json(allevents);
+        res.json(allevents.reverse());
     } catch (error) {
         console.error(error.message);
         res.status(500).send("some error occured");
@@ -726,6 +727,35 @@ router.post('/fetch_count_of_the_classes', fetchadmin, async (req, res) => {
         console.error(error.message);
         res.status(500).send("some error occured");
     }
+})
+
+
+// Router 21:- upload event photoes http://localhost:5050/api/admin/upload_event_photos
+router.post('/upload_event_photos', fetchadmin, Events_photoes.array("events_files"), async (req, res) => {
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        return res.status(400).json({ success: false, error: "Sorry U should ligin first" })
+    }
+
+    const files = req.files.map(file => {
+        return {
+            filename: file.filename,
+            // originalname: file.originalname,
+            // path: file.path,
+            mimetype: file.mimetype
+        };
+    });
+    console.log(files);
+    res.status(200).json({ message: 'Files uploaded successfully' });
+
+    // events_files.insertMany(files)
+    //     .then(() => {
+    //         res.status(200).json({ message: 'Files uploaded successfully' });
+    //     })
+    //     .catch((error) => {
+    //         console.error('Error uploading files', error);
+    //         res.status(500).json({ error: 'Failed to upload files' });
+    //     });
 })
 
 module.exports = router
