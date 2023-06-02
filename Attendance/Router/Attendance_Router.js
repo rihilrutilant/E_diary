@@ -50,7 +50,7 @@ router.post('/take_attendance', fetchTeachers, [
     try {
 
         const ClassCode = std.ClassCode;
-        
+
         if (ClassCode.includes(Class_code)) {
             const allIds = []
 
@@ -138,19 +138,37 @@ router.post('/filter_taken_attendance/:id', fetchTeachers, async (req, res) => {
 
         const data = attend.Attend
 
-        const present = []
-        const absent = []
+        const p = []
+        const a = []
 
         data.forEach((attendObj) => {
-            Object.keys(attendObj).forEach((key) => {
+            Object.keys(attendObj).forEach(async (key) => {
                 const value = attendObj[key];
                 if (value == "true") {
-                    present.push(key)
+                    p.push(key)
                 } else {
-                    absent.push(key)
+                    a.push(key)
                 }
             });
         });
+
+        const present = []
+
+        for (let index = 0; index < p.length; index++) {
+            const element = p[index];
+            const student = await Students.findOne({S_icard_Id:element})
+            let s_name = student.S_name
+            present.push({"Name":s_name,"S_Icard_Id":element})
+        }
+
+        const absent = []
+
+        for (let index = 0; index < a.length; index++) {
+            const element = a[index];
+            const student = await Students.findOne({ S_icard_Id: element })
+            let s_name = student.S_name
+            absent.push({ "Name": s_name, "S_Icard_Id": element })
+        }
 
         const attendance = [
             {
