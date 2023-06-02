@@ -18,6 +18,8 @@ const Material = require("../../Teachers/Models/Materials_Model")
 const Events_photoes = require("../../Image_Middleware/Event_photos")
 const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
+const fs = require("fs")
+
 
 router.post('/', async (req, res) => {
     res.send("Hii backend is now running on port")
@@ -734,45 +736,149 @@ router.post('/fetch_count_of_the_classes', fetchadmin, async (req, res) => {
 // Router 21:- upload event photoes http://localhost:5050/api/admin/upload_event_photos
 router.post('/upload_event_photos', fetchadmin, Events_photoes.array("events_files"), [
     body('Event_title', 'Please choose the event title').isLength({ min: 6 })
-],
-    async (req, res) => {
-        const admin = await Admin.findById(req.admin.id);
-        const { Event_title } = req.body
-        if (!admin) {
-            return res.status(400).json({ success: false, error: "Sorry U should ligin first" })
+], async (req, res) => {
+    let success = false;
+    const { Event_title } = req.body
+
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    const files = req.files.map(file => {
+        return {
+            filename: file.filename
+        };
+    });
+    const filenames = files.map(file => file.filename);
+
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files were uploaded' });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        for (let index = 0; index < filenames.length; index++) {
+            const element = filenames[index];
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -14);
+            const filePath = dirname + '/Events_photos/' + element;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
         }
+        return res.status(400).json({ success, error: errors.array() });
+    }
 
-        let success = false;
-        // If there are errors, return Bad request and the errors
-        if (!req.files) {
-            success = false;
-            return res.status(400).json({ success, error: "Please provide file" })
+
+    const title = await Events.findOne({ Event_title: Event_title })
+    if (!title) {
+        success = false;
+        for (let index = 0; index < filenames.length; index++) {
+            const element = filenames[index];
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -14);
+            const filePath = dirname + '/Events_photos/' + element;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
         }
+        return res.status(400).json({ success, error: "PLease Enter valide title" })
+    }
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            success = false;
-            return res.status(400).json({ success, error: errors.array() });
+    try {
+        const Event_Photos = filenames
+        const e_photos = new EventPhotos({
+            Event_title, Event_Photos
+        })
+
+        photos = await e_photos.save();
+        const data = {
+            photos: {
+                id: photos.id
+            }
         }
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.json({ success, authtoken });
 
-
-        const title = await Events.findOne({ Event_title: Event_title })
-        if(!title){
-            success = false;
-            return res.status(400).json({ success, error: "PLease Enter valide title" })
+    } catch (e) {
+        success = false;
+        for (let index = 0; index < filenames.length; index++) {
+            const element = filenames[index];
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -14);
+            const filePath = dirname + '/Events_photos/' + element;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
         }
+        res.status(500).send("some error occured");
+    }
+})
 
 
+// Router 22:- Delete event photoes http://localhost:5050/api/admin/delete_evente_photoes/:{id}
+router.delete('/delete_evente_photoes/:id', fetchadmin, async (req, res) => {
+    let success = false
 
-        const files = req.files.map(file => {
-            return {
-                filename: file.filename
-            };
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        success = false
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    const event = await EventPhotos.findById(req.params.id)
+    if (!event) {
+        success = false
+        return res.status(400).json({ success, error: "Data Not found" })
+    }
+
+    const filenames = event.Event_Photos
+
+    const deleteFiles = (filenames) => {
+        filenames.forEach((filename) => {
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -14);
+            const filePath = `${dirname}/Events_photos/${filename}`;
+
+            // Check if the file exists
+            if (fs.existsSync(filePath)) {
+                // Delete the file
+                fs.unlink(filePath, (error) => {
+                    if (error) {
+                        console.error(`Error deleting file: ${filePath}`, error);
+                    }
+                });
+            } else {
+                console.log(`File not found: ${filePath}`);
+            }
         });
+    };
 
-        const filenames = files.map(file => file.filename);
-        console.log(filenames);
-        res.status(200).json({ message: 'Files uploaded successfully' });
-    })
+    deleteFiles(filenames);
+
+    const photos = await EventPhotos.findByIdAndDelete(req.params.id)
+    const data = {
+        photos: {
+            id: photos.id
+        }
+    }
+    const authtoken = jwt.sign(data, JWT_SECRET);
+    success = true;
+
+    res.json({ success, authtoken });
+})
 
 module.exports = router
