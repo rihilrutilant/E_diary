@@ -20,6 +20,7 @@ const Material_Files = require("../../Image_Middleware/Material_Files")
 const Material = require("../Models/Materials_Model")
 const Subjects = require("../../Admin/Models/Subjects_Models")
 const Homework = require("../Models/Homework_Model")
+const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 
 
 // Router 1:- Create teacher  http://localhost:5050/api/teachers/create_teacher
@@ -1402,6 +1403,32 @@ router.post('/get_all_classes', fetchTeachers, async (req, res) => {
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error");
+    }
+})
+
+
+// Router 29:- fetch all event images http://localhost:5050/api/teachers/fetch_all_events_photoes
+router.post('/fetch_all_events_photoes', fetchTeachers, async (req, res) => {
+    let success = false
+
+    let teacher = await Teachers.findById(req.teacher.id)
+    if (!teacher) {
+        success = false
+        res.send(500).json({ success, error: "Youy should login first" })
+    }
+
+    try {
+        const e_photos = await EventPhotos.find()
+        if (e_photos.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Event Photos Found" })
+        }
+        else {
+            res.json({ e_photos })
+        }
+    } catch (e) {
+        success = false;
+        res.status(500).send("some error occured");
     }
 })
 

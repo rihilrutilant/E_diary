@@ -20,6 +20,7 @@ const Holidays = require('../../Admin/Models/Holiday_Model');
 const Material = require("../../Teachers/Models/Materials_Model")
 const Subjects = require("../../Admin/Models/Subjects_Models")
 const Homework = require("../../Teachers/Models/Homework_Model")
+const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 
 
 
@@ -730,6 +731,32 @@ router.post('/get_all_subjects_class_wise', fetchStudent, async (req, res) => {
         // res.json(subjects)
     } catch (error) {
         console.error(error.message);
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 29:- fetch all event images http://localhost:5050/api/students/fetch_all_events_photoes
+router.post('/fetch_all_events_photoes', fetchStudent, async (req, res) => {
+    let success = false
+
+    let student = await Students.findById(req.student.id)
+    if (!student) {
+        success = false
+        res.send(500).json({ success, error: "Youy should login first" })
+    }
+
+    try {
+        const e_photos = await EventPhotos.find()
+        if (e_photos.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Event Photos Found" })
+        }
+        else {
+            res.json({ e_photos })
+        }
+    } catch (e) {
+        success = false;
         res.status(500).send("some error occured");
     }
 })

@@ -220,6 +220,7 @@ router.post('/send_event', fetchadmin, [
     }
 })
 
+
 // Router 7:- Fetch all events http://localhost:5050/api/admin/get_all_eventes
 router.post('/get_all_eventes', fetchadmin, async (req, res) => {
     try {
@@ -235,6 +236,7 @@ router.post('/get_all_eventes', fetchadmin, async (req, res) => {
         res.status(500).send("some error occured");
     }
 })
+
 
 // Router 8:- Edit Events  http://localhost:5050/api/admin/edit_Events/{id}
 router.patch('/edit_Events/:id', fetchadmin, [
@@ -703,6 +705,7 @@ router.post('/fetch_count_of_the_teachers', fetchadmin, async (req, res) => {
     }
 })
 
+
 // Router 20:- Fetch the count of the classes http://localhost:5050/api/admin/fetch_count_of_the_classes
 router.post('/fetch_count_of_the_classes', fetchadmin, async (req, res) => {
     let success = false;
@@ -867,18 +870,49 @@ router.delete('/delete_evente_photoes/:id', fetchadmin, async (req, res) => {
         });
     };
 
-    deleteFiles(filenames);
+    try {
+        deleteFiles(filenames);
 
-    const photos = await EventPhotos.findByIdAndDelete(req.params.id)
-    const data = {
-        photos: {
-            id: photos.id
+        const photos = await EventPhotos.findByIdAndDelete(req.params.id)
+        const data = {
+            photos: {
+                id: photos.id
+            }
         }
-    }
-    const authtoken = jwt.sign(data, JWT_SECRET);
-    success = true;
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
 
-    res.json({ success, authtoken });
+        res.json({ success, authtoken });
+    } catch (e) {
+        success = false;
+        res.status(500).send("some error occured");
+    }
 })
+
+// Router 23:- fetch all event images http://localhost:5050/api/admin/fetch_all_events_photoes
+router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
+    let success = false
+
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        success = false
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    try {
+        const e_photos = await EventPhotos.find()
+        if (e_photos.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Event Photos Found" })
+        }
+        else {
+            res.json({ e_photos })
+        }
+    } catch (e) {
+        success = false;
+        res.status(500).send("some error occured");
+    }
+})
+
 
 module.exports = router
