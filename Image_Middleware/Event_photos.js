@@ -17,15 +17,6 @@ const storage = multer.diskStorage({
         const extension = file.originalname.split('.').pop();
         const filename = `${uuidv4()}.${extension}`;
         cb(null, filename);
-    },
-    fileFilter: (req, file, cb) => {
-        // Check the file's mimetype
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
-        if (allowedMimeTypes.includes(file.mimetype)) {
-            cb(null, true); // Accept the file
-        } else {
-            cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF) and videos (MP4, MOV) are allowed.'));
-        }
     }
 });
 

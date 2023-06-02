@@ -16,6 +16,7 @@ const Homework = require("../../Teachers/Models/Homework_Model")
 const Classes = require("../../Classes/Models/Class_module")
 const Material = require("../../Teachers/Models/Materials_Model")
 const Events_photoes = require("../../Image_Middleware/Event_photos")
+const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/', async (req, res) => {
@@ -731,31 +732,47 @@ router.post('/fetch_count_of_the_classes', fetchadmin, async (req, res) => {
 
 
 // Router 21:- upload event photoes http://localhost:5050/api/admin/upload_event_photos
-router.post('/upload_event_photos', fetchadmin, Events_photoes.array("events_files"), async (req, res) => {
-    const admin = await Admin.findById(req.admin.id);
-    if (!admin) {
-        return res.status(400).json({ success: false, error: "Sorry U should ligin first" })
-    }
+router.post('/upload_event_photos', fetchadmin, Events_photoes.array("events_files"), [
+    body('Event_title', 'Please choose the event title').isLength({ min: 6 })
+],
+    async (req, res) => {
+        const admin = await Admin.findById(req.admin.id);
+        const { Event_title } = req.body
+        if (!admin) {
+            return res.status(400).json({ success: false, error: "Sorry U should ligin first" })
+        }
 
-    const files = req.files.map(file => {
-        return {
-            filename: file.filename,
-            // originalname: file.originalname,
-            // path: file.path,
-            mimetype: file.mimetype
-        };
-    });
-    console.log(files);
-    res.status(200).json({ message: 'Files uploaded successfully' });
+        let success = false;
+        // If there are errors, return Bad request and the errors
+        if (!req.files) {
+            success = false;
+            return res.status(400).json({ success, error: "Please provide file" })
+        }
 
-    // events_files.insertMany(files)
-    //     .then(() => {
-    //         res.status(200).json({ message: 'Files uploaded successfully' });
-    //     })
-    //     .catch((error) => {
-    //         console.error('Error uploading files', error);
-    //         res.status(500).json({ error: 'Failed to upload files' });
-    //     });
-})
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            success = false;
+            return res.status(400).json({ success, error: errors.array() });
+        }
+
+
+        const title = await Events.findOne({ Event_title: Event_title })
+        if(!title){
+            success = false;
+            return res.status(400).json({ success, error: "PLease Enter valide title" })
+        }
+
+
+
+        const files = req.files.map(file => {
+            return {
+                filename: file.filename
+            };
+        });
+
+        const filenames = files.map(file => file.filename);
+        console.log(filenames);
+        res.status(200).json({ message: 'Files uploaded successfully' });
+    })
 
 module.exports = router

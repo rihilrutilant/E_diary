@@ -1021,17 +1021,56 @@ router.delete('/delete_material/:id', fetchTeachers, async (req, res) => {
 
 
 // Router 17:- Fetch all materials of the teachers http://localhost:5050/api/teachers/fetch_all_materials
-router.post('/fetch_all_materials', fetchTeachers, async (req, res) => {
+router.post('/fetch_all_materials', fetchTeachers, [
+    body('Class_code', 'Please enter correct class code').isLength({ min: 3, max: 3 }),
+], async (req, res) => {
     let success = false
+    const { Class_code } = req.body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ success, error: errors.array() });
+    }
     try {
         let fetchTeacher = await Teachers.findById(req.teacher.id)
         if (!fetchTeacher) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.send(500).json({ success, error: "Youy should login first" })
         }
 
-        let materials = await Material.find({ T_icard_Id: fetchTeacher.T_icard_Id })
-        res.json(materials)
+        const standard = Class_code.substring(0, 2);
+
+        let std = await Classes.findOne({ Standard: standard })
+        if (!std) {
+            success = false
+            return res.status(400).json({ success, error: "Please Chooes correct class code" })
+        }
+
+        const material = []
+
+        const ClassCode = std.ClassCode;
+
+        if (ClassCode.includes(Class_code)) {
+
+            let materials = await Material.find({ T_icard_Id: fetchTeacher.T_icard_Id })
+
+            for (let index = 0; index < materials.length; index++) {
+                const element = materials[index].Class_code;
+                if (element === Class_code) {
+                    material.push(materials[index])
+                }
+            }
+        } else {
+            success = false
+            return res.status(400).json({ success, error: "Class Code doesn't exist" });
+        }
+
+        const data = material.reverse();
+        if (data.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "Data Doesn't Exist" });
+        }
+        res.json({ data })
+
     } catch (error) {
         console.error(error.message);
         res.status(500).send("some error occured");
