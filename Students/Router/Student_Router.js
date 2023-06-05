@@ -813,7 +813,7 @@ router.post('/fetch_results_of_student', fetchStudent, async (req, res) => {
         const results = await Result.find({ S_icard_Id: student.S_icard_Id })
         if (results.length == 0) {
             success = false
-            return res.status(400).json({ success, error: "No Result Found" })
+            return res.json("No Result Found")
         }
         else {
             res.json(results);

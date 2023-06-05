@@ -903,8 +903,7 @@ router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
     try {
         const e_photos = await EventPhotos.find()
         if (e_photos.length == 0) {
-            success = false
-            return res.status(400).json({ success, error: "No Event Photos Found" })
+            return res.json("No Event Photos Found")
         }
         else {
             res.json(e_photos)
