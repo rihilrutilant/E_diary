@@ -889,7 +889,34 @@ router.delete('/delete_evente_photoes/:id', fetchadmin, async (req, res) => {
     }
 })
 
+
 // Router 23:- fetch all event images http://localhost:5050/api/admin/fetch_all_events_photoes
+router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
+    let success = false
+
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        success = false
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    try {
+        const e_photos = await EventPhotos.find()
+        if (e_photos.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Event Photos Found" })
+        }
+        else {
+            res.json(e_photos)
+        }
+    } catch (e) {
+        success = false;
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 24:- fetch event images by ids http://localhost:5050/api/admin/fetch_all_events_photoes
 router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
     let success = false
 
