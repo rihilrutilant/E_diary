@@ -44,6 +44,7 @@ app.use('/api/examtimetable', require("./Exam_TimeTable/Router/Exam_TimeTable_Ro
 // Images folders
 app.use("/notices", express.static("./Notices"));
 app.use("/materials", express.static("./Material"));
+app.use("/event_photos", express.static("./Events_photos"));
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)

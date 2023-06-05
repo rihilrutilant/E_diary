@@ -2,13 +2,24 @@ const mongooes = require('mongoose')
 const { Schema } = mongooes
 
 const Ressultschemas = new Schema({
-    Standard:{
-        type:String,
-        required:true
+    S_icard_Id: {
+        type: String,
+        require: true,
+        unique: true
     },
-    Class_code:{
-        type:String,
-        require:true
+    Exam_type:{
+        type: String,
+        require: true
     },
-    
+    Result_copy:{
+        type: String,
+        require: true
+    },
+    Date:{
+        type:String,
+        require: true
+    }
 })
+
+const Result = mongoose.model('Result', Ressultschemas);
+module.exports = Result;

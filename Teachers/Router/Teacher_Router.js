@@ -1424,7 +1424,7 @@ router.post('/fetch_all_events_photoes', fetchTeachers, async (req, res) => {
             return res.status(400).json({ success, error: "No Event Photos Found" })
         }
         else {
-            res.json({ e_photos })
+            res.json(e_photos)
         }
     } catch (e) {
         success = false;

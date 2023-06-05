@@ -916,8 +916,8 @@ router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
 })
 
 
-// Router 24:- fetch event images by ids http://localhost:5050/api/admin/fetch_all_events_photoes
-router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
+// Router 24:- fetch event images by ids http://localhost:5050/api/admin/fetch_events_photoes/{id}
+router.post('/fetch_events_photoes/:id', fetchadmin, async (req, res) => {
     let success = false
 
     const admin = await Admin.findById(req.admin.id);
@@ -927,13 +927,13 @@ router.post('/fetch_all_events_photoes', fetchadmin, async (req, res) => {
     }
 
     try {
-        const e_photos = await EventPhotos.find()
-        if (e_photos.length == 0) {
+        const e_photos = await EventPhotos.findById(req.params.id)
+        if (!e_photos) {
             success = false
             return res.status(400).json({ success, error: "No Event Photos Found" })
         }
         else {
-            res.json({ e_photos })
+            res.json(e_photos)
         }
     } catch (e) {
         success = false;

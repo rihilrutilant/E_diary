@@ -667,12 +667,17 @@ router.post('/fetch_all_materials_of_the_subjects', fetchStudent, [
 
 
 // Router 16:- Fetch all homeworks of the subjects http://localhost:5050/api/students/fetch_all_homeworks_of_the_subject
-router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, async (req, res) => {
+router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, [
+    body('Homework_given_date', 'Please enter apt homework given date').isDate(),
+    body('Subject_code', 'Please enter currect subjectr code').isLength({ min: 5, max: 5 }),
+], async (req, res) => {
     let success = false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+    const { Homework_given_date, Subject_code } = req.body
+
     try {
         let fetchstudent = await Students.findById(req.student.id)
         if (!fetchstudent) {
@@ -681,6 +686,21 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, async (req, res
         }
 
         let homework = await Homework.find({ Class_code: fetchstudent.S_Class_code })
+
+        if (homework.length == 0) {
+            success = false
+            res.send(500).json({ success, error: "No Data found" })
+        }
+
+        for (let index = 0; index < homework.length; index++) {
+            const element = homework[index];
+            if (element.Subject_code == Subject_code) {
+                const hw = element
+                console.log(hw);
+            }
+        }
+
+
         res.json(homework)
     } catch (error) {
         console.error(error.message);
@@ -753,7 +773,7 @@ router.post('/fetch_all_events_photoes', fetchStudent, async (req, res) => {
             return res.status(400).json({ success, error: "No Event Photos Found" })
         }
         else {
-            res.json({ e_photos })
+            res.json(e_photos)
         }
     } catch (e) {
         success = false;
