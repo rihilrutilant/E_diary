@@ -21,6 +21,7 @@ const Material = require("../../Teachers/Models/Materials_Model")
 const Subjects = require("../../Admin/Models/Subjects_Models")
 const Homework = require("../../Teachers/Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
+const Result = require("../../Results/Model/Results")
 
 
 
@@ -682,26 +683,42 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, [
         let fetchstudent = await Students.findById(req.student.id)
         if (!fetchstudent) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.send(400).json({ success, error: "Youy should login first" })
         }
 
         let homework = await Homework.find({ Class_code: fetchstudent.S_Class_code })
 
         if (homework.length == 0) {
             success = false
-            res.send(500).json({ success, error: "No Data found" })
+            return res.send(400).json({ success, error: "No Data found" })
         }
 
+        const homework_data = []
         for (let index = 0; index < homework.length; index++) {
             const element = homework[index];
             if (element.Subject_code == Subject_code) {
-                const hw = element
-                console.log(hw);
+
+                const dateString = element.Homework_given_date
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+
+                if (formattedDate == Homework_given_date) {
+                    homework_data.push(element)
+                }
             }
         }
 
+        if (homework_data.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "Data Not found" })
+        }
+        else {
+            res.json(homework_data)
+        }
 
-        res.json(homework)
     } catch (error) {
         console.error(error.message);
         res.status(500).send("some error occured");
@@ -781,5 +798,30 @@ router.post('/fetch_all_events_photoes', fetchStudent, async (req, res) => {
     }
 })
 
+
+// Router 30:- fetch results  http://localhost:5050/api/students/fetch_results_of_student
+router.post('/fetch_results_of_student', fetchStudent, async (req, res) => {
+    let success = false;
+
+    let student = await Students.findById(req.student.id)
+    if (!student) {
+        success = false
+        res.send(500).json({ success, error: "Youy should login first" })
+    }
+
+    try {
+        const results = await Result.find({ S_icard_Id: student.S_icard_Id })
+        if (results.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Result Found" })
+        }
+        else {
+            res.json(results);
+        }
+
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+})
 
 module.exports = router

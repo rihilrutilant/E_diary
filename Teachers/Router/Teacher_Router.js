@@ -21,6 +21,7 @@ const Material = require("../Models/Materials_Model")
 const Subjects = require("../../Admin/Models/Subjects_Models")
 const Homework = require("../Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
+const Result = require("../../Results/Model/Results")
 
 
 // Router 1:- Create teacher  http://localhost:5050/api/teachers/create_teacher
@@ -1430,6 +1431,49 @@ router.post('/fetch_all_events_photoes', fetchTeachers, async (req, res) => {
         success = false;
         res.status(500).send("some error occured");
     }
+})
+
+
+
+// Router 30:- fetch results  http://localhost:5050/api/teachers/fetch_results_of_student
+router.post('/fetch_results_of_student', fetchTeachers, [
+    body('S_icard_Id', 'Id should be atlist 6 characher').isLength({ min: 6 }),
+], async (req, res) => {
+    let success = false;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+
+    const { S_icard_Id } = req.body;
+
+    let teacher = await Teachers.findById(req.teacher.id)
+    if (!teacher) {
+        success = false
+        res.send(500).json({ success, error: "Youy should login first" })
+    }
+
+    const fetchstudent = await Students.findOne({ S_icard_Id: S_icard_Id });
+    if (!fetchstudent) {
+        success = false
+        return res.status(400).json({ success, error: "Please enter valide student i-card id" })
+    }
+
+    try {
+        const results = await Result.find({ S_icard_Id: S_icard_Id })
+        if (results.length == 0) {
+            success = false
+            return res.status(400).json({ success, error: "No Result Found" })
+        }
+        else {
+            res.json(results);
+        }
+
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+
 })
 
 

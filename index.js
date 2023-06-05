@@ -40,11 +40,17 @@ app.use("/api/timetable", require("./TimeTable/Router/Timetable_Router"))
 app.use('/api/examtimetable', require("./Exam_TimeTable/Router/Exam_TimeTable_Router"))
 
 
+// Results
+app.use('/api/results', require("./Results/Router/Results"))
+
+
+
 
 // Images folders
 app.use("/notices", express.static("./Notices"));
 app.use("/materials", express.static("./Material"));
 app.use("/event_photos", express.static("./Events_photos"));
+app.use("/result_data", express.static("./Result_data"))
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
