@@ -104,7 +104,6 @@ router.post('/get_all_notice', fetchadmin, async (req, res) => {
         const allnotice = await NoticeBord.find({ Admin_id: req.admin.id });
         res.json(allnotice.reverse());
     } catch (error) {
-        console.error(error.message);
         res.status(500).send("some error occured");
     }
 })

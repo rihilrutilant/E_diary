@@ -67,7 +67,6 @@ router.post('/take_attendance', fetchTeachers, [
                 if (!student) {
                     success = false
                     return res.status(400).json({ success, error: "Please Choose correct Students of the class" })
-                    break;
                 }
             }
 

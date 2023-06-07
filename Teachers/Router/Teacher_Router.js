@@ -99,7 +99,7 @@ router.post('/create_teacher', fetchadmin, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -144,7 +144,7 @@ router.post('/teachers_login', [
         }
     }
     catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -177,7 +177,7 @@ router.post('/get_all_notice_of_teachers', fetchTeachers, async (req, res) => {
         }
         res.json(finalList);
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -223,7 +223,7 @@ router.post('/fetch_all_students', fetchTeachers, [
         }
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -243,7 +243,7 @@ router.post('/fetch_all_complains', fetchTeachers, async (req, res) => {
         res.json(allComplains);
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -300,7 +300,7 @@ router.post('/send_complain_to_teacher', fetchTeachers, [
         success = true;
         res.json({ success, authtoken });
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -320,7 +320,7 @@ router.post('/fetch_complains_of_teacher', fetchTeachers, async (req, res) => {
         res.json(allcomplains);
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -382,7 +382,7 @@ router.patch('/edit_complain/:id', fetchTeachers, [
         res.json({ success, authtoken });
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 
@@ -426,7 +426,7 @@ router.delete('/delete_complain/:id', fetchTeachers, async (req, res) => {
         }
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -516,7 +516,7 @@ router.patch('/update_teacher_details/:id', fetchadmin, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 
@@ -554,7 +554,7 @@ router.delete('/delete_teachers_info/:id', fetchadmin, async (req, res) => {
         res.json({ success, authtoken });
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -589,7 +589,7 @@ router.post('/get_all_events_of_teachers', fetchTeachers, async (req, res) => {
         res.json(finalList);
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -624,7 +624,7 @@ router.post('/get_all_holidays_of_teachers', fetchTeachers, async (req, res) => 
         res.json(finalList);
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1000,7 +1000,7 @@ router.delete('/delete_material/:id', fetchTeachers, async (req, res) => {
             if (err) {
 
                 success = false;
-                res.status(404).json({ success, error: 'Error deleting file' });
+                return res.status(404).json({ success, error: 'Error deleting file' });
             } else {
                 delMaterial = await Material.findByIdAndDelete(id)
 
@@ -1017,7 +1017,7 @@ router.delete('/delete_material/:id', fetchTeachers, async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1037,7 +1037,7 @@ router.post('/fetch_all_materials', fetchTeachers, [
         let fetchTeacher = await Teachers.findById(req.teacher.id)
         if (!fetchTeacher) {
             success = false
-            return res.send(500).json({ success, error: "Youy should login first" })
+            return res.status(500).json({ success, error: "Youy should login first" })
         }
 
         const standard = Class_code.substring(0, 2);
@@ -1075,7 +1075,7 @@ router.post('/fetch_all_materials', fetchTeachers, [
         res.json({ data })
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1143,7 +1143,7 @@ router.post('/send_homework', fetchTeachers, [
             success = true;
             res.json({ success, authtoken });
         } catch (error) {
-            console.error(error.message);
+
             res.status(500).send("some error occured");
         }
     } else {
@@ -1233,7 +1233,7 @@ router.patch('/edit_homework/:id', fetchTeachers, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 
@@ -1271,7 +1271,7 @@ router.delete('/delete_homework/:id', fetchTeachers, async (req, res) => {
         res.json({ success, authtoken });
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1292,7 +1292,7 @@ router.post('/fetch_all_homeworks', fetchTeachers, [
         let fetchTeacher = await Teachers.findById(req.teacher.id)
         if (!fetchTeacher) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.status(500).json({ success, error: "Youy should login first" })
         }
 
         const standard = Class_code.substring(0, 2);
@@ -1326,7 +1326,7 @@ router.post('/fetch_all_homeworks', fetchTeachers, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1339,11 +1339,11 @@ router.post('/fetch_all_details_of_login_teacher', fetchTeachers, async (req, re
         let teacher = await Teachers.findById(req.teacher.id)
         if (!teacher) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.status(500).json({ success, error: "Youy should login first" })
         }
         res.json(teacher)
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })
@@ -1365,20 +1365,20 @@ router.post('/get_all_subjects_class_wise', fetchTeachers, [
         let teacher = await Teachers.findById(req.teacher.id)
         if (!teacher) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.status(500).json({ success, error: "Youy should login first" })
         }
 
         let subjects = await Subjects.find({ Standard: Standard })
         if (subjects.length > 0) {
-            res.send(subjects);
+            res.json(subjects);
         } else {
             success = false;
-            res.json({ success, error: "Please try with correct class code" });
+            return res.status(500).json({ success, error: "Please try with correct class code" });
         }
         // res.json(subjects)
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send("some error occured");
+
+        res.status(500).json("some error occured");
     }
 })
 
@@ -1390,7 +1390,7 @@ router.post('/get_all_classes', fetchTeachers, async (req, res) => {
         let teacher = await Teachers.findById(req.teacher.id)
         if (!teacher) {
             success = false
-            res.send(500).json({ success, error: "Youy should login first" })
+            return res.status(500).json({ success, error: "Youy should login first" })
         }
 
         const classes = await Classes.find()
@@ -1403,7 +1403,7 @@ router.post('/get_all_classes', fetchTeachers, async (req, res) => {
 
 
     } catch (error) {
-        console.error(error.message);
+
         res.status(500).send("Internal Server Error");
     }
 })
@@ -1416,7 +1416,7 @@ router.post('/fetch_all_events_photoes', fetchTeachers, async (req, res) => {
     let teacher = await Teachers.findById(req.teacher.id)
     if (!teacher) {
         success = false
-        res.send(500).json({ success, error: "Youy should login first" })
+        return res.status(500).json({ success, error: "Youy should login first" })
     }
 
     try {
@@ -1452,7 +1452,7 @@ router.post('/fetch_results_of_student', fetchTeachers, [
     let teacher = await Teachers.findById(req.teacher.id)
     if (!teacher) {
         success = false
-        res.send(500).json({ success, error: "Youy should login first" })
+        return res.status(500).json({ success, error: "Youy should login first" })
     }
 
     const fetchstudent = await Students.findOne({ S_icard_Id: S_icard_Id });
@@ -1504,7 +1504,7 @@ router.post('/fetch_all_complains_of_admin', fetchTeachers, async (req, res) => 
         }
     }
     catch (error) {
-        console.error(error.message);
+
         res.status(500).send("some error occured");
     }
 })

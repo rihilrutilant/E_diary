@@ -80,7 +80,7 @@ router.post('/get_all_subjects_class_wise', fetchadmin, [
 
         let subjects = await Subjects.find({ Standard: Standard })
         if (subjects.length > 0) {
-            res.send(subjects);
+            res.json(subjects);
         } else {
             success = false;
             res.json({ success, error: "Please try with correct class code" });

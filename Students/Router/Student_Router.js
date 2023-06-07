@@ -583,33 +583,29 @@ router.post('/get_all_holidays_of_students', fetchStudent, async (req, res) => {
 
 
 // Router 14:- Fetch fees of student http://localhost:5050/api/students/fetch_fees
-router.post('/fetch_fees', fetchStudent, [
-    body('Standard', 'please enter a standard').isLength({ min: 2, max: 2 }),
-], async (req, res) => {
+router.post('/fetch_fees', fetchStudent, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         success = false;
         return res.status(400).json({ success, error: errors.array() });
     }
     try {
-        const { Standard } = req.body;
         const fetchStudent = await Students.findById(req.student.id);
         if (!fetchStudent) {
             success = false
             return res.status(400).json({ success, error: "Sorry U should ligin first" })
         }
 
-        const allfees = await Fees_set.findOne({ Standard: Standard });
+        const allfees = await Fees_set.findOne({ Standard: fetchStudent.S_standard });
         if (allfees) {
             res.json(allfees);
         }
         else {
             success = false
-            res.json({ success, error: "Sorry U should ligin first" })
+            return res.status(400).json({ success, error: "Sorry U should ligin first" })
         }
 
     } catch (error) {
-         
         res.status(500).send("some error occured");
     }
 })
@@ -646,7 +642,7 @@ router.post('/fetch_all_materials_of_the_subjects', fetchStudent, [
             res.json(materials)
         }
     } catch (error) {
-         
+
         res.status(500).send("some error occured");
     }
 })
@@ -705,7 +701,7 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, [
         }
 
     } catch (error) {
-         
+
         res.status(500).send("some error occured");
     }
 })
@@ -726,7 +722,7 @@ router.post('/fetch_all_details_of_login_students', fetchStudent, async (req, re
         }
         res.json(student)
     } catch (error) {
-         
+
         res.status(500).send("some error occured");
     }
 })
@@ -740,7 +736,7 @@ router.post('/get_all_subjects_class_wise', fetchStudent, async (req, res) => {
         let student = await Students.findById(req.student.id)
         if (!student) {
             success = false
-            return res.status(500).json({ success, error: "Youy should login first" })
+            return res.status(400).json({ success, error: "Youy should login first" })
         }
 
         let subjects = await Subjects.find({ Standard: student.S_standard })
@@ -748,11 +744,11 @@ router.post('/get_all_subjects_class_wise', fetchStudent, async (req, res) => {
             res.send(subjects);
         } else {
             success = false;
-            res.json({ success, error: "Please try with correct class code" });
+            return res.status(400).json({ success, error: "Please try with correct class code" });
         }
         // res.json(subjects)
     } catch (error) {
-         
+
         res.status(500).send("some error occured");
     }
 })
@@ -772,7 +768,7 @@ router.post('/fetch_all_events_photoes', fetchStudent, async (req, res) => {
         const e_photos = await EventPhotos.find()
         if (e_photos.length == 0) {
             success = false
-            return res.status(400).json({ success, error: "No Event Photos Found" })
+            return res.json({ success, error: "No Event Photos Found" })
         }
         else {
             res.json(e_photos)
@@ -837,7 +833,7 @@ router.post('/fetch_all_complains_of_admin', fetchStudent, async (req, res) => {
         }
     }
     catch (error) {
-         
+
         res.status(500).send("some error occured");
     }
 })
