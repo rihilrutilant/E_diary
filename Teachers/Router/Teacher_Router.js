@@ -22,6 +22,7 @@ const Subjects = require("../../Admin/Models/Subjects_Models")
 const Homework = require("../Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 const Result = require("../../Results/Model/Results")
+const Admin_complain_box = require("../../Admin/Models/Admin_complainBox")
 
 
 // Router 1:- Create teacher  http://localhost:5050/api/teachers/create_teacher
@@ -1476,5 +1477,36 @@ router.post('/fetch_results_of_student', fetchTeachers, [
 
 })
 
+// Router 31:- fetch all the complains Group wise http://localhost:5050/api/teachers/fetch_all_complains_of_admin
+router.post('/fetch_all_complains_of_admin', fetchTeachers, async (req, res) => {
+    let success = false;
+    // If there are errors, return Bad request and the errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+
+    try {
+        let teacher = await Teachers.findById(req.teacher.id)
+        if (!teacher) {
+            success = false
+            return res.status(500).json({ success, error: "Youy should login first" })
+        }
+
+        const complains = await Admin_complain_box.find({ User_Id: teacher.T_icard_Id })
+        if (complains.length == 0) {
+            success = false
+            return res.json("No Complain Found")
+        }
+        else {
+            res.json(complains)
+        }
+    }
+    catch (error) {
+        console.error(error.message);
+        res.status(500).send("some error occured");
+    }
+})
 
 module.exports = router

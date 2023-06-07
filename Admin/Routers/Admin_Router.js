@@ -19,6 +19,7 @@ const Events_photoes = require("../../Image_Middleware/Event_photos")
 const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require("fs")
+const Admin_complain_box = require("../Models/Admin_complainBox")
 
 
 router.post('/', async (req, res) => {
@@ -939,6 +940,189 @@ router.post('/fetch_events_photoes/:id', fetchadmin, async (req, res) => {
         res.status(500).send("some error occured");
     }
 })
+
+
+// Router 25:- Send complains to the teachers or students  http://localhost:5050/api/admin/send_complain_t&s
+router.post('/send_complain_t&s', fetchadmin, [
+    body('Complain_title', 'Title should be atlest 6 char').isLength({ min: 6 }),
+    body('Complain_description', 'Decription should be atlest 10 char').isLength({ min: 10 }),
+    body('User_Id', 'I-Card Id should be atlest 6 char').isLength({ min: 6 }),
+    body('User_name', 'Name should be atlest 2 char').isLength({ min: 2 }),
+    body('Groups', 'groups name should be atlest 6 char').isLength({ min: 6 }),
+], async (req, res) => {
+    let success = false;
+    // If there are errors, return Bad request and the errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+
+    const { Complain_title, Complain_description, User_Id, User_name, Groups } = req.body;
+
+    try {
+
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+        }
+
+        let userId = await Students.findOne({ S_icard_Id: User_Id })
+        if (!userId) {
+            let userId2 = await Teachers.findOne({ T_icard_Id: User_Id })
+            if (!userId2) {
+                success = false
+                return res.status(400).json({ success, error: "Sorry You can't send complain on this Id" })
+            } else {
+                if (userId2.T_name != User_name) {
+                    success = false
+                    return res.status(400).json({ success, error: "PLease choose correct name of Teacher" })
+                }
+            }
+        } else {
+            if (userId.S_name != User_name) {
+                success = false
+                return res.status(400).json({ success, error: "PLease choose correct name of students" })
+            }
+        }
+
+        let admin_complain_box = new Admin_complain_box({
+            Complain_title, Complain_description, User_Id, User_name, Groups
+        })
+
+        admin_complain_box = await admin_complain_box.save();
+        const data = {
+            admin_complain_box: {
+                id: admin_complain_box.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.json({ success, authtoken });
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 26:- Edit the admin complain http://localhost:5050/api/admin/edit_complain/:{id}
+router.patch('/edit_complain/:id', fetchadmin, [
+    body('Complain_title', 'Title should be atlest 6 char').isLength({ min: 6 }),
+    body('Complain_description', 'Decription should be atlest 10 char').isLength({ min: 10 })
+], async (req, res) => {
+    let success = false;
+    // If there are errors, return Bad request and the errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+    const { Complain_title, Complain_description } = req.body;
+
+    try {
+        let complain = await Admin_complain_box.findById(req.params.id);
+        if (!complain) {
+            success = false;
+            return res.status(404).json({ success, error: "not found" })
+        }
+
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+        }
+
+
+        const newComplain = {};
+        if (Complain_title) { newComplain.Complain_title = Complain_title };
+        if (Complain_description) { newComplain.Complain_description = Complain_description };
+        newComplain.Date = Date.now()
+
+        complain = await Admin_complain_box.findByIdAndUpdate(req.params.id, { $set: newComplain })
+
+        const data = {
+            complain: {
+                id: complain.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.json({ success, authtoken });
+
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+
+})
+
+
+// Router 27:- Delete the complain http://localhost:5050/api/admin/delete_complain/:{id}
+router.delete('/delete_complain/:id', fetchadmin, async (req, res) => {
+    const { id } = req.params;
+    let success = false;
+    try {
+        let complain = await Admin_complain_box.findById(req.params.id);
+        if (!complain) {
+            success = false;
+            return res.status(404).json({ success, error: "not found" })
+        }
+
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+        }
+
+        const complainBox = await Admin_complain_box.findByIdAndDelete(id)
+
+        const data = {
+            complainBox: {
+                id: complainBox.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.json({ success, authtoken });
+
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 28:- fetch all the complains Group wise http://localhost:5050/api/admin/fetch_all_complains
+router.post('/fetch_all_complains', fetchadmin, [
+    body('Groups', 'groups name should be atlest 6 char').isLength({ min: 6 })
+], async (req, res) => {
+    let success = false;
+    // If there are errors, return Bad request and the errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+
+    const { Groups } = req.body;
+    try {
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should login first" })
+        }
+
+        const complains = await Admin_complain_box.find({ Groups: Groups })
+        res.json(complains)
+    }
+    catch (error) {
+        console.error(error.message);
+        res.status(500).send("some error occured");
+    }
+})
+
 
 
 module.exports = router
