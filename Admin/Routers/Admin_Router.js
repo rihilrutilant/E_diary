@@ -61,7 +61,7 @@ router.post('/admin_login', [
         res.status(200).json({ success, authtoken })
 
     } catch (error) {
-        
+
         res.status(500).send("Internal Server Error");
     }
 });
@@ -77,11 +77,13 @@ router.post('/fetch_all_teachers', fetchadmin, async (req, res) => {
             return res.status(400).json({ success, error: "Sorry U should ligin first" })
         }
         const allTeachers = await Teachers.find()
-
+        if (allTeachers.length == 0) {
+            return res.json("Teachers Not Found")
+        }
         res.json(allTeachers);
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -118,8 +120,7 @@ router.post('/fetch_all_Students', fetchadmin, [
 
             const allStudents = await Students.find({ S_Class_code: S_Class_code })
             if (allStudents.length == 0) {
-                success = false
-                return res.status(400).json({ success, error: "Student Not Found" })
+                return res.json("Student Not Found")
             }
             res.json(allStudents);
         } else {
@@ -127,7 +128,7 @@ router.post('/fetch_all_Students', fetchadmin, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -147,7 +148,7 @@ router.post('/fetch_all_complains_of_students', fetchadmin, async (req, res) => 
         res.json(allComplains);
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -167,7 +168,7 @@ router.post('/fetch_all_complains_of_teachers', fetchadmin, async (req, res) => 
         res.json(allComplains);
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -212,7 +213,7 @@ router.post('/send_event', fetchadmin, [
         success = true;
         res.json({ success, authtoken });
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -229,7 +230,7 @@ router.post('/get_all_eventes', fetchadmin, async (req, res) => {
         const allevents = await Events.find();
         res.json(allevents.reverse());
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -285,7 +286,7 @@ router.patch('/edit_Events/:id', fetchadmin, [
         res.json({ success, authtoken });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 
@@ -322,7 +323,7 @@ router.delete('/delete_events/:id', fetchadmin, async (req, res) => {
         res.json({ success, authtoken });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -367,7 +368,7 @@ router.post('/send_holiday', fetchadmin, [
         success = true;
         res.json({ success, authtoken });
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -384,7 +385,7 @@ router.post('/get_all_holidays', fetchadmin, async (req, res) => {
         const allholidays = await Holidays.find();
         res.json(allholidays.reverse());
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -440,7 +441,7 @@ router.patch('/edit_holidays/:id', fetchadmin, [
         res.json({ success, authtoken });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 
@@ -477,7 +478,7 @@ router.delete('/delete_holidays/:id', fetchadmin, async (req, res) => {
         res.json({ success, authtoken });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -549,7 +550,7 @@ router.post('/get_all_standard_fees', fetchadmin, async (req, res) => {
         const allfees = await Fees_set.find();
         res.json(allfees);
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -596,7 +597,7 @@ router.patch('/edit_fees_of_standard/:id', fetchadmin, [
         res.json({ success, authtoken });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 
@@ -617,7 +618,7 @@ router.post('/fetch_all_materials', fetchadmin, [
         let fetchAdmin = await Admin.findById(req.admin.id)
         if (!fetchAdmin) {
             success = false
-             return res.status(500).json({ success, error: "You should login first" })
+            return res.status(500).json({ success, error: "You should login first" })
         }
 
         let t_icard_id = await Teachers.findOne({ T_icard_Id: req.body.T_icard_Id });
@@ -629,7 +630,7 @@ router.post('/fetch_all_materials', fetchadmin, [
         let materials = await Material.find({ T_icard_Id: req.body.T_icard_Id })
         res.json(materials)
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -661,7 +662,7 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchadmin, [
         let homework = await Homework.find({ T_icard_Id: req.body.T_icard_Id })
         res.json(homework)
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -679,7 +680,7 @@ router.post('/fetch_count_of_the_Students', fetchadmin, async (req, res) => {
         const allStudents = await Students.find()
         res.json({ count: allStudents.length });
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -697,7 +698,7 @@ router.post('/fetch_count_of_the_teachers', fetchadmin, async (req, res) => {
         const allTeachers = await Teachers.find()
         res.json({ count: allTeachers.length });
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -727,7 +728,7 @@ router.post('/fetch_count_of_the_classes', fetchadmin, async (req, res) => {
         });
         res.json({ count: total });
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -1113,7 +1114,7 @@ router.post('/fetch_all_complains', fetchadmin, [
         res.json(complains)
     }
     catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })

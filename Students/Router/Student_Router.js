@@ -671,7 +671,7 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, [
 
         if (homework.length == 0) {
             success = false
-            return res.status(400).json({ success, error: "No Data found" })
+            return res.status(200).json(homework)
         }
 
         const homework_data = []
@@ -691,14 +691,7 @@ router.post('/fetch_all_homeworks_of_the_subject', fetchStudent, [
                 }
             }
         }
-
-        if (homework_data.length == 0) {
-            success = false
-            return res.status(400).json({ success, error: "Data Not found" })
-        }
-        else {
-            res.json(homework_data)
-        }
+        res.status(200).json(homework_data)
 
     } catch (error) {
 
