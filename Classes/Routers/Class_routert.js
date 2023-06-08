@@ -18,7 +18,7 @@ router.post('/create_class_code', fetchadmin, [
     // If there are errors, return Bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ error: errors.array() });
     }
 
     const { Classcode, Standard } = req.body;
@@ -27,13 +27,13 @@ router.post('/create_class_code', fetchadmin, [
         const admin = await Admin.findById(req.admin.id)
         if (!admin) {
             success = false
-            return res.status(400).json({ error: "Please try to login with correct credentials" });
+            return res.status(400).json({ success, error: "Please try to login with correct credentials" });
         }
 
         const classes = await Classes.findOne({ Standard: Standard })
         if (!classes) {
             success = false
-            return res.status(400).json({ error: "please enter a valide standard" });
+            return res.status(400).json({ success, error: "please enter a valide standard" });
         }
 
         const ClassCode = classes.ClassCode;
@@ -42,7 +42,7 @@ router.post('/create_class_code', fetchadmin, [
             const element = ClassCode[index];
             if (element == Classcode) {
                 success = false
-                return res.status(400).json({ error: "Class Code already exist with this standard" });
+                return res.status(400).json({ success, error: "Class Code already exist with this standard" });
             }
         }
 
@@ -69,7 +69,6 @@ router.post('/create_class_code', fetchadmin, [
 
 
     } catch (error) {
-        console.error(error.message);
         res.status(500).send("Internal Server Error");
     }
 })
@@ -100,35 +99,60 @@ router.post('/get_all_classes', fetchadmin, async (req, res) => {
 })
 
 // Router:3 Delete classes http://localhost:5050/api/classcode/delete_class/:{id}
-router.delete('/delete_class/:id', fetchadmin, async (req, res) => {
+router.patch('/delete_class/:id', fetchadmin, [
+    body('Classcode', "Enter a valid classcode").isLength({ min: 3, max: 3 }),
+], async (req, res) => {
     let success = false;
     const { id } = req.params
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
         const admin = await Admin.findById(req.admin.id)
         if (!admin) {
             success = false
-            return res.status(400).json({ error: "Please try to login with correct credentials" });
+            return res.status(400).json({ success, error: "Please try to login with correct credentials" });
         }
 
         const classes = await Classes.findById(id)
         if (!classes) {
             success = false
-            return res.status(400).json({ error: "This class code is already exist" });
+            return res.status(400).json({ success, error: "Wrong data inserted" });
         }
 
-        const deleteClass = await Classes.findByIdAndDelete(id)
+        console.log(classes);
+        const { Classcode } = req.body
 
-        const data = {
-            deleteClass: {
-                id: deleteClass.id
+        const array = classes.ClassCode
+        const valueToCheck = Classcode;
+
+        if (array.includes(valueToCheck)) {
+            if (Classcode === classes.Standard + 'A') {
+                success = false
+                return res.status(200).json({ success, error: "Sorry you can't delete the last class" });
             }
+            else {
+                const filteredArray = array.filter(item => item !== valueToCheck);
+                const newclasscode = {};
+                if (filteredArray) { newclasscode.ClassCode = filteredArray };
+
+                updateclasscode = await Classes.findByIdAndUpdate(id, { $set: newclasscode })
+
+                const data = {
+                    updateclasscode: {
+                        id: updateclasscode.id
+                    }
+                }
+                const authtoken = jwt.sign(data, JWT_SECRET);
+                success = true;
+                res.status(200).json({ success, authtoken });
+            }
+        } else {
+            success = false
+            return res.status(400).json({ success, error: "Sorry ypu have entered wrong ClassCode" });
         }
-
-        const authtoken = jwt.sign(data, JWT_SECRET);
-        success = true;
-        res.status(200).json({ success, authtoken });
-
-
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error");

@@ -1046,7 +1046,7 @@ router.patch('/edit_complain/:id', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.status(200).json({ success, authtoken });;
+        res.status(200).json({ success, authtoken });
 
     } catch (error) {
         res.status(500).send("some error occured");
