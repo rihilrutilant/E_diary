@@ -154,7 +154,7 @@ router.post('/fetch_all_complains_of_students', fetchadmin, async (req, res) => 
 })
 
 
-// Router 5:- Fetch all complains from Students http://localhost:5050/api/admin/fetch_all_complains_of_teachers
+// Router 5:- Fetch all complains from Teachers http://localhost:5050/api/admin/fetch_all_complains_of_teachers
 router.post('/fetch_all_complains_of_teachers', fetchadmin, async (req, res) => {
     let success = false;
     try {
