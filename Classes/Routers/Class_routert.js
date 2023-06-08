@@ -121,8 +121,6 @@ router.patch('/delete_class/:id', fetchadmin, [
             success = false
             return res.status(400).json({ success, error: "Wrong data inserted" });
         }
-
-        console.log(classes);
         const { Classcode } = req.body
 
         const array = classes.ClassCode
