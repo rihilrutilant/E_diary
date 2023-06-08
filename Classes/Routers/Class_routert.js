@@ -64,7 +64,7 @@ router.post('/create_class_code', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
         // res.send("Hii this is me")
 
@@ -127,7 +127,7 @@ router.delete('/delete_class/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
 
     } catch (error) {

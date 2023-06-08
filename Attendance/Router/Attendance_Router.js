@@ -83,7 +83,7 @@ router.post('/take_attendance', fetchTeachers, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -155,9 +155,9 @@ router.post('/filter_taken_attendance/:id', fetchTeachers, async (req, res) => {
 
         for (let index = 0; index < p.length; index++) {
             const element = p[index];
-            const student = await Students.findOne({S_icard_Id:element})
+            const student = await Students.findOne({ S_icard_Id: element })
             let s_name = student.S_name
-            present.push({"Name":s_name,"S_Icard_Id":element})
+            present.push({ "Name": s_name, "S_Icard_Id": element })
         }
 
         const absent = []

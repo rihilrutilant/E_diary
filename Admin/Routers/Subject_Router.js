@@ -51,7 +51,7 @@ router.post('/create_subject', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
         console.error(error.message);
         res.status(500).send("some error occured");

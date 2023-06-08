@@ -14,8 +14,7 @@ const fetchadmin = (req, res, next) => {
         req.admin = data.admin;
         next();
     } catch (err) {
-        const data = jwt.verify(token, JWT_SECRET);
-        res.status(401).send({ error: err })
+        res.status(401).send({ error: "User does not exist" })
     }
 
 }

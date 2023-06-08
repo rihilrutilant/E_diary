@@ -92,7 +92,7 @@ router.post('/create_teacher', fetchadmin, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
 
         } else {
             success = false
@@ -135,7 +135,7 @@ router.post('/teachers_login', [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         }
         else {
             success = false;
@@ -298,7 +298,7 @@ router.post('/send_complain_to_teacher', fetchTeachers, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
 
         res.status(500).send("some error occured");
@@ -379,7 +379,7 @@ router.patch('/edit_complain/:id', fetchTeachers, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -417,7 +417,7 @@ router.delete('/delete_complain/:id', fetchTeachers, async (req, res) => {
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
 
         }
         else {
@@ -510,7 +510,7 @@ router.patch('/update_teacher_details/:id', fetchadmin, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -551,7 +551,7 @@ router.delete('/delete_teachers_info/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -748,7 +748,7 @@ router.post('/add_material', fetchTeachers, Material_Files.single("material_file
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } catch (error) {
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
@@ -939,7 +939,7 @@ router.patch('/edit_material/:id', fetchTeachers, Material_Files.single("materia
 
                     const authtoken = jwt.sign(data, JWT_SECRET);
                     success = true;
-                    res.json({ success, authtoken });
+                    res.status(200).json({ success, authtoken });;
                 }
             });
 
@@ -1012,7 +1012,7 @@ router.delete('/delete_material/:id', fetchTeachers, async (req, res) => {
 
                 const authtoken = jwt.sign(data, JWT_SECRET);
                 success = true;
-                res.json({ success, authtoken });
+                res.status(200).json({ success, authtoken });;
             }
         });
 
@@ -1141,7 +1141,7 @@ router.post('/send_homework', fetchTeachers, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } catch (error) {
 
             res.status(500).send("some error occured");
@@ -1227,7 +1227,7 @@ router.patch('/edit_homework/:id', fetchTeachers, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -1268,7 +1268,7 @@ router.delete('/delete_homework/:id', fetchTeachers, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 

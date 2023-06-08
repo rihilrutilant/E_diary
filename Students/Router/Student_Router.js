@@ -85,7 +85,7 @@ router.post('/create_students', fetchadmin, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -126,7 +126,7 @@ router.post('/student_login', [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         }
         else {
             success = false;
@@ -214,20 +214,20 @@ router.post('/send_complain_to_teacher', fetchStudent, [
         let student = await Students.findById(req.student.id)
         if (!student) {
             success = false
-            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+            return res.status(404).json({ success, error: "Sorry U should ligin first" })
         }
 
         let S_icard_Id = student.S_icard_Id
         let student_icard_id = await Students.findOne({ S_icard_Id: S_icard_Id })
         if (!student_icard_id) {
             success = false
-            return res.status(400).json({ success, error: "You cannot send complain to the teachers" })
+            return res.status(404).json({ success, error: "You cannot send complain to the teachers" })
         }
 
         let teacher = await Teachers.findOne({ T_icard_Id: T_icard_Id })
         if (!teacher) {
             success = false
-            return res.status(400).json({ success, error: "Teacher i-card id does not exist" })
+            return res.status(404).json({ success, error: "Teacher i-card id does not exist" })
         }
 
         let student_complain_box = new Student_complain_box({
@@ -243,7 +243,7 @@ router.post('/send_complain_to_teacher', fetchStudent, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
         res.status(500).send("some error occured");
     }
@@ -320,7 +320,7 @@ router.patch('/edit_complain/:id', fetchStudent, [
 
         if (complain.S_icard_Id !== student.S_icard_Id) {
             success = false
-            return res.status(400).json({ success, error: "you can not edit this complain" })
+            return res.status(404).json({ success, error: "you can not edit this complain" })
         }
 
 
@@ -341,7 +341,7 @@ router.patch('/edit_complain/:id', fetchStudent, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         res.status(500).send("some error occured");
@@ -378,7 +378,7 @@ router.delete('/delete_complain/:id', fetchStudent, async (req, res) => {
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });
 
         }
         else {
@@ -465,7 +465,7 @@ router.patch('/update_student_details/:id', fetchadmin, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -506,7 +506,7 @@ router.delete('/delete_students_info/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         res.status(500).send("some error occured");
@@ -642,7 +642,6 @@ router.post('/fetch_all_materials_of_the_subjects', fetchStudent, [
             res.json(materials)
         }
     } catch (error) {
-
         res.status(500).send("some error occured");
     }
 })
@@ -813,17 +812,11 @@ router.post('/fetch_all_complains_of_admin', fetchStudent, async (req, res) => {
         let student = await Students.findById(req.student.id)
         if (!student) {
             success = false
-            return res.status(400).json({ success, error: "Youy should login first" })
+            return res.status(404).json({ success, error: "Youy should login first" })
         }
 
         const complains = await Admin_complain_box.find({ User_Id: student.S_icard_Id })
-        if (complains.length == 0) {
-            success = false
-            return res.json("No Complain Found")
-        }
-        else {
-            res.json(complains)
-        }
+        res.status(200).json(complains)
     }
     catch (error) {
 

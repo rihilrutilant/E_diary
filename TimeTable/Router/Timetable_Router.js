@@ -99,14 +99,14 @@ router.post('/make_timetable', fetchAdmin, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -156,7 +156,7 @@ router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
             return res.status(400).json({ error: "Class Code doesn't exist" });
         }
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -234,10 +234,10 @@ router.patch('/edit_timetable/:id', fetchAdmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -262,7 +262,7 @@ router.post('/fetch_timetable_for_students', fetchStudents, async (req, res) => 
         res.json({ timetable });
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })
@@ -324,7 +324,7 @@ router.post('/fetch_all_lectures_of_the_teachers', fetchTeachers, async (req, re
         res.json(teacher_timetable)
 
     } catch (error) {
-        
+
         res.status(500).send("some error occured");
     }
 })

@@ -133,7 +133,7 @@ router.post('/set_examtimetable', fetchAdmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (err) {
         return res.status(500).json({ message: "Internal server error" });
     }
@@ -284,7 +284,7 @@ router.patch('/edit_examtimetable/:id', fetchAdmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         console.error(error.message);

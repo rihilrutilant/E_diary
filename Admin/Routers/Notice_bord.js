@@ -75,7 +75,7 @@ router.post('/send_notice', fetchadmin, noticeAttach.single("notice_attach"), [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
         const dirPath = __dirname;
         const dirname = dirPath.slice(0, -13);
@@ -211,7 +211,7 @@ router.patch('/edit_notice/:id', fetchadmin, noticeAttach.single("notice_attach"
 
                 const authtoken = jwt.sign(data, JWT_SECRET);
                 success = true;
-                res.json({ success, authtoken });
+                res.status(200).json({ success, authtoken });;
             }
         });
 
@@ -269,7 +269,7 @@ router.delete('/delete_notice/:id', fetchadmin, async (req, res) => {
 
                 const authtoken = jwt.sign(data, JWT_SECRET);
                 success = true;
-                res.json({ success, authtoken });
+                res.status(200).json({ success, authtoken });;
             }
         });
     } catch (error) {

@@ -91,7 +91,7 @@ router.post('/upload_results', fetchadmin, Results_data.single("result_photos"),
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         const dirPath = __dirname;
@@ -186,7 +186,7 @@ router.delete('/delete_results/:id', fetchadmin, async (req, res) => {
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.json({ success, authtoken });
+            res.status(200).json({ success, authtoken });;
         }
     });
 })

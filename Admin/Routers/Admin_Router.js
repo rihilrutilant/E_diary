@@ -211,7 +211,7 @@ router.post('/send_event', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
 
         res.status(500).send("some error occured");
@@ -283,7 +283,7 @@ router.patch('/edit_Events/:id', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -320,7 +320,7 @@ router.delete('/delete_events/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -366,7 +366,7 @@ router.post('/send_holiday', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
 
         res.status(500).send("some error occured");
@@ -438,7 +438,7 @@ router.patch('/edit_holidays/:id', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -475,7 +475,7 @@ router.delete('/delete_holidays/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -530,7 +530,7 @@ router.delete('/delete_holidays/:id', fetchadmin, async (req, res) => {
 
 //         const authtoken = jwt.sign(data, JWT_SECRET);
 //         success = true;
-//         res.json({ success, authtoken });
+//         res.status(200).json({ success, authtoken });;
 //     } catch (error) {
 //         
 //         res.status(500).send("some error occured");
@@ -594,7 +594,7 @@ router.patch('/edit_fees_of_standard/:id', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
 
@@ -808,7 +808,7 @@ router.post('/upload_event_photos', fetchadmin, Events_photoes.array("events_fil
         }
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (e) {
         success = false;
@@ -879,7 +879,7 @@ router.delete('/delete_evente_photoes/:id', fetchadmin, async (req, res) => {
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
 
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (e) {
         success = false;
         res.status(500).send("some error occured");
@@ -996,7 +996,7 @@ router.post('/send_complain_t&s', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
     } catch (error) {
         res.status(500).send("some error occured");
     }
@@ -1046,7 +1046,7 @@ router.patch('/edit_complain/:id', fetchadmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         res.status(500).send("some error occured");
@@ -1082,7 +1082,7 @@ router.delete('/delete_complain/:id', fetchadmin, async (req, res) => {
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.json({ success, authtoken });
+        res.status(200).json({ success, authtoken });;
 
     } catch (error) {
         res.status(500).send("some error occured");

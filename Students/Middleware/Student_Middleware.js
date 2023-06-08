@@ -13,9 +13,7 @@ const fetchStudent = (req, res, next) => {
         req.student = data.students;
         next();
     } catch (err) {
-        const data = jwt.verify(token, JWT_SECRET);
-        console.log(err, data)
-        res.status(401).send({ error: err })
+        res.status(401).send({ error: "User does not exist" })
     }
 }
 
