@@ -51,7 +51,7 @@ app.use("/notices", express.static("./Notices"));
 app.use("/materials", express.static("./Material"));
 app.use("/event_photos", express.static("./Events_photos"));
 app.use("/result_data", express.static("./Result_data"))
-app.use("/teacher_img", express.static("./Teacher_imgs"))
+app.use("/teacher_img", express.static("./Teachers_imgs"))
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)

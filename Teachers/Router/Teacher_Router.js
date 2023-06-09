@@ -1229,7 +1229,7 @@ router.patch('/edit_homework/:id', fetchTeachers, [
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
-            res.status(200).json({ success, authtoken });;
+            res.status(200).json({ success, authtoken });
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -1593,6 +1593,87 @@ router.post('/fetch_img_of_teacher', fetchTeachers, async (req, res) => {
     }
     catch (error) {
 
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 32:- Add Subject materials http://localhost:5050/api/teachers/edit_img_of_teacher/{id}
+router.patch('/edit_img_of_teacher/:id', fetchTeachers, Teacher_Imgs.single("T_photo"), async (req, res) => {
+    let success = false;
+
+    const { filename } = req.file
+
+    const fetchTeacher = await Teachers.findById(req.teacher.id);
+    if (!fetchTeacher) {
+        success = false
+        const dirPath = __dirname;
+        const dirname = dirPath.slice(0, -16);
+        const filePath = dirname + '/Teachers_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    try {
+
+        const T_imgs = await TeacherImg.findOne({ T_icard_Id: fetchTeacher.T_icard_Id })
+        if (!T_imgs) {
+            success = false
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -16);
+            const filePath = dirname + '/Teachers_imgs/' + filename;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
+            return res.status(200).json({ success, error: "You can't delete this image" })
+        }
+
+        const new_t_img = {};
+        if (filename) { new_t_img.T_img = filename };
+
+        const dirPath = __dirname;
+        const dirname = dirPath.slice(0, -16);
+        const filePath = dirname + '/Teachers_imgs/' + T_imgs.T_img;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
+
+        edit_t_img = await TeacherImg.findByIdAndUpdate(req.params.id, { $set: new_t_img })
+
+        const data = {
+            edit_t_img: {
+                id: edit_t_img.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.status(200).json({ success, authtoken });
+
+    } catch (error) {
+        const dirPath = __dirname;
+        const dirname = dirPath.slice(0, -16);
+        const filePath = dirname + '/Teachers_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
         res.status(500).send("some error occured");
     }
 })
