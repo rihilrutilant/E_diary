@@ -21,6 +21,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require("fs")
 const Admin_complain_box = require("../Models/Admin_complainBox")
 const TeacherImg = require("../../Teachers/Models/Teacher_photo")
+const StudentImg = require("../../Students/Models/Students_photos")
 
 
 
@@ -541,6 +542,7 @@ router.delete('/delete_holidays/:id', fetchadmin, async (req, res) => {
 
 
 // Router 15:- Fetch all standard's fees http://localhost:5050/api/admin/get_all_holidays
+
 router.post('/get_all_standard_fees', fetchadmin, async (req, res) => {
     try {
         const fetchAdmin = await Admin.findById(req.admin.id);
@@ -1143,6 +1145,24 @@ router.post('/fetch_img_of_teacher', fetchadmin, [
     }
 })
 
+
+// Router 30:- fetch the image of students http://localhost:5050/api/admin/fetch_img_of_student
+router.post('/fetch_img_of_student', fetchadmin, async (req, res) => {
+    let success = false;
+    try {
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should login first" })
+        }
+
+        const s_imgs = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
+        res.status(200).json(s_imgs)
+    }
+    catch (error) {
+        res.status(500).send("some error occured");
+    }
+})
 
 
 module.exports = router
