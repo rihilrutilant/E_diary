@@ -22,6 +22,7 @@ const Homework = require("../../Teachers/Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 const Result = require("../../Results/Model/Results")
 const Admin_complain_box = require("../../Admin/Models/Admin_complainBox")
+const TeacherImg = require("../../Teachers/Models/Teacher_photo")
 
 
 // Router 1:- Create Students  http://localhost:5050/api/students/create_students
@@ -823,5 +824,29 @@ router.post('/fetch_all_complains_of_admin', fetchStudent, async (req, res) => {
         res.status(500).send("some error occured");
     }
 })
+
+
+// Router 32:- fetch the image of teacher http://localhost:5050/api/students/fetch_img_of_teacher
+router.post('/fetch_img_of_teacher', fetchStudent, [
+    body('T_icard_Id', 'Id should be atlest 6 char').isLength({ min: 6 })
+], async (req, res) => {
+    const { T_icard_Id } = req.body
+    let success = false;
+    try {
+        let student = await Students.findById(req.student.id)
+        if (!student) {
+            success = false
+            return res.status(404).json({ success, error: "Youy should login first" })
+        }
+
+        const t_imgs = await TeacherImg.findOne({ T_icard_Id: T_icard_Id })
+        res.status(200).json(t_imgs)
+    }
+    catch (error) {
+
+        res.status(500).send("some error occured");
+    }
+})
+
 
 module.exports = router
