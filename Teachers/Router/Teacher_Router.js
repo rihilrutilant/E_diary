@@ -23,6 +23,8 @@ const Homework = require("../Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 const Result = require("../../Results/Model/Results")
 const Admin_complain_box = require("../../Admin/Models/Admin_complainBox")
+const Teacher_Imgs = require("../../Image_Middleware/Teacher_photo")
+const TeacherImg = require("../Models/Teacher_photo")
 
 
 // Router 1:- Create teacher  http://localhost:5050/api/teachers/create_teacher
@@ -1435,7 +1437,6 @@ router.post('/fetch_all_events_photoes', fetchTeachers, async (req, res) => {
 })
 
 
-
 // Router 30:- fetch results  http://localhost:5050/api/teachers/fetch_results_of_student
 router.post('/fetch_results_of_student', fetchTeachers, [
     body('S_icard_Id', 'Id should be atlist 6 characher').isLength({ min: 6 }),
@@ -1480,13 +1481,6 @@ router.post('/fetch_results_of_student', fetchTeachers, [
 // Router 31:- fetch all the complains Group wise http://localhost:5050/api/teachers/fetch_all_complains_of_admin
 router.post('/fetch_all_complains_of_admin', fetchTeachers, async (req, res) => {
     let success = false;
-    // If there are errors, return Bad request and the errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        success = false;
-        return res.status(400).json({ success, error: errors.array() });
-    }
-
     try {
         let teacher = await Teachers.findById(req.teacher.id)
         if (!teacher) {
@@ -1508,5 +1502,100 @@ router.post('/fetch_all_complains_of_admin', fetchTeachers, async (req, res) => 
         res.status(500).send("some error occured");
     }
 })
+
+
+
+// Router 32:- Add Subject materials http://localhost:5050/api/teachers/upload_img_of_teacher
+router.post('/upload_img_of_teacher', fetchTeachers, Teacher_Imgs.single("T_photo"), async (req, res) => {
+    let success = false;
+
+    const { filename } = req.file
+
+    const fetchTeacher = await Teachers.findById(req.teacher.id);
+    if (!fetchTeacher) {
+        success = false
+        const dirPath = __dirname;
+        const dirname = dirPath.slice(0, -16);
+        const filePath = dirname + '/Teachers_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
+        return res.status(400).json({ success, error: "Sorry U should ligin first" })
+    }
+
+    try {
+
+        const T_imgs = await TeacherImg.findOne({ T_icard_Id: fetchTeacher.T_icard_Id })
+        if (T_imgs) {
+            success = false
+            const dirPath = __dirname;
+            const dirname = dirPath.slice(0, -16);
+            const filePath = dirname + '/Teachers_imgs/' + filename;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
+            return res.status(200).json({ success, error: "You have already uploaded your image" })
+        }
+
+        const T_img = filename
+        const T_icard_Id = fetchTeacher.T_icard_Id
+
+        let t_imgs = new TeacherImg({
+            T_icard_Id, T_img
+        })
+
+        t_imgs = await t_imgs.save();
+        const data = {
+            t_imgs: {
+                id: t_imgs.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.status(200).json({ success, authtoken });
+
+    } catch (error) {
+        const dirPath = __dirname;
+        const dirname = dirPath.slice(0, -16);
+        const filePath = dirname + '/Teachers_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 33:- fetch the image of teacher http://localhost:5050/api/teachers/fetch_img_of_teacher
+router.post('/fetch_img_of_teacher', fetchTeachers, async (req, res) => {
+    let success = false;
+    try {
+        let teacher = await Teachers.findById(req.teacher.id)
+        if (!teacher) {
+            success = false
+            return res.status(500).json({ success, error: "Youy should login first" })
+        }
+
+        const t_imgs = await TeacherImg.findOne({ T_icard_Id: teacher.T_icard_Id })
+        res.status(200).json(t_imgs)
+    }
+    catch (error) {
+
+        res.status(500).send("some error occured");
+    }
+})
+
 
 module.exports = router

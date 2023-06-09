@@ -150,7 +150,7 @@ router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
                 return res.status(400).json({ success, error: "not found" })
             }
 
-            res.json({ timetable });
+            res.status(200).json({ timetable });
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
@@ -259,7 +259,7 @@ router.post('/fetch_timetable_for_students', fetchStudents, async (req, res) => 
             return res.status(400).json({ success, error: "not found" })
         }
 
-        res.json({ timetable });
+        res.status(200).json(timetable);
 
     } catch (error) {
 
@@ -321,7 +321,7 @@ router.post('/fetch_all_lectures_of_the_teachers', fetchTeachers, async (req, re
         }
 
 
-        res.json(teacher_timetable)
+        res.status(200).json(teacher_timetable)
 
     } catch (error) {
 

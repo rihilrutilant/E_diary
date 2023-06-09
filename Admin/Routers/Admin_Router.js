@@ -20,6 +20,7 @@ const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require("fs")
 const Admin_complain_box = require("../Models/Admin_complainBox")
+const TeacherImg = require("../../Teachers/Models/Teacher_photo")
 
 
 
@@ -1112,6 +1113,29 @@ router.post('/fetch_all_complains', fetchadmin, [
 
         const complains = await Admin_complain_box.find({ Groups: Groups })
         res.json(complains.reverse())
+    }
+    catch (error) {
+
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 29:- fetch the image of teacher http://localhost:5050/api/admin/fetch_img_of_teacher
+router.post('/fetch_img_of_teacher', fetchadmin, [
+    body('T_icard_Id', 'Id should be atlest 6 char').isLength({ min: 6 })
+], async (req, res) => {
+    const { T_icard_Id } = req.body
+    let success = false;
+    try {
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should login first" })
+        }
+
+        const t_imgs = await TeacherImg.findOne({ T_icard_Id: T_icard_Id })
+        res.status(200).json(t_imgs)
     }
     catch (error) {
 
