@@ -114,7 +114,7 @@ router.post('/make_timetable', fetchAdmin, [
 
 // Router 2:- fetch all time tables http://localhost:5050/api/timetable/fetch_all_timetable_by_classes
 router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
-    body("Class_code", "Teachers id should be atlist 5 characters").isLength({ min: 3 })
+    body("Class_code", "classcode should be atlist 3 characters").isLength({ min: 3 })
 ], async (req, res) => {
     let success = false;
     // If there are errors, return Bad request and the errors
