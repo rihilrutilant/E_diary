@@ -150,7 +150,7 @@ router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
                 return res.status(400).json({ success, error: "not found" })
             }
 
-            res.status(200).json({ timetable });
+            res.status(200).json(timetable);
         } else {
             success = false
             return res.status(400).json({ error: "Class Code doesn't exist" });
