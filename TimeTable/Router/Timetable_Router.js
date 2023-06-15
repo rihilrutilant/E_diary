@@ -139,24 +139,15 @@ router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
         return res.status(400).json({ success, error: "Please Chooes correct class code" })
     }
 
-    const ClassCode = std.ClassCode;
-
     try {
-        if (ClassCode.includes(Class_code)) {
 
-            let timetable = await TimeTable.findOne({ Class_code: Class_code })
-            if (!timetable) {
-                success = false
-                return res.status(400).json({ success, error: "not found" })
-            }
-
-            res.status(200).json(timetable);
-        } else {
+        let timetable = await TimeTable.findOne({ Class_code: Class_code })
+        if (!timetable) {
             success = false
-            return res.status(400).json({ error: "Class Code doesn't exist" });
+            return res.status(200).json({ success, error: "not found" })
         }
+        res.status(200).json(timetable);
     } catch (error) {
-
         res.status(500).send("some error occured");
     }
 })
