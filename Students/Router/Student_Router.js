@@ -188,7 +188,24 @@ router.post('/fetch_all_teachers', fetchStudent, async (req, res) => {
         }
 
         const allTeachers = await Teachers.find()
-        res.json(allTeachers);
+
+        const alldata = []
+        for (let index = 0; index < allTeachers.length; index++) {
+            const element = allTeachers[index].T_icard_Id;
+            const t_img = await TeacherImg.findOne({ T_icard_Id: element })
+            if (t_img) {
+                const teacher = allTeachers[index];
+                const timg = t_img.T_img
+                alldata.push({ teacher, timg })
+            }
+            else {
+                const teacher = allTeachers[index];
+                const timg = null
+                alldata.push({ teacher, timg })
+            }
+
+        }
+        res.json(alldata);
 
     } catch (error) {
         res.status(500).send("some error occured");
