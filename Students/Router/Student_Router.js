@@ -22,8 +22,6 @@ const Homework = require("../../Teachers/Models/Homework_Model")
 const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 const Result = require("../../Results/Model/Results")
 const Admin_complain_box = require("../../Admin/Models/Admin_complainBox")
-const TeacherImg = require("../../Teachers/Models/Teacher_photo")
-const StudentImg = require("../Models/Students_photos")
 const Students_Imgs = require("../../Image_Middleware/Students_photos")
 const fs = require("fs");
 
@@ -102,7 +100,7 @@ router.post('/create_students', fetchadmin, [
 // Router 2:- Student Login  http://localhost:5050/api/students/student_login
 router.post('/student_login', [
     body('S_icard_Id', 'Icard-id should be atlest 6 char').isLength({ min: 6 }),
-    body('S_Password', 'Password should be atlest 10 char').isLength({ min: 6 })
+    body('S_Password', 'Password should be atlest 6 char').isLength({ min: 6 })
 ], async (req, res) => {
     let success = false;
     // If there are errors, return Bad request and the errors
@@ -188,24 +186,7 @@ router.post('/fetch_all_teachers', fetchStudent, async (req, res) => {
         }
 
         const allTeachers = await Teachers.find()
-
-        const alldata = []
-        for (let index = 0; index < allTeachers.length; index++) {
-            const element = allTeachers[index].T_icard_Id;
-            const t_img = await TeacherImg.findOne({ T_icard_Id: element })
-            if (t_img) {
-                const teacher = allTeachers[index];
-                const timg = t_img.T_img
-                alldata.push({ teacher, timg })
-            }
-            else {
-                const teacher = allTeachers[index];
-                const timg = null
-                alldata.push({ teacher, timg })
-            }
-
-        }
-        res.json(alldata);
+        res.status(200).json(allTeachers);
 
     } catch (error) {
         res.status(500).send("some error occured");
@@ -845,31 +826,8 @@ router.post('/fetch_all_complains_of_admin', fetchStudent, async (req, res) => {
 })
 
 
-// Router 32:- fetch the image of teacher http://localhost:5050/api/students/fetch_img_of_teacher
-router.post('/fetch_img_of_teacher', fetchStudent, [
-    body('T_icard_Id', 'Id should be atlest 6 char').isLength({ min: 6 })
-], async (req, res) => {
-    const { T_icard_Id } = req.body
-    let success = false;
-    try {
-        let student = await Students.findById(req.student.id)
-        if (!student) {
-            success = false
-            return res.status(404).json({ success, error: "Youy should login first" })
-        }
-
-        const t_imgs = await TeacherImg.findOne({ T_icard_Id: T_icard_Id })
-        res.status(200).json(t_imgs)
-    }
-    catch (error) {
-
-        res.status(500).send("some error occured");
-    }
-})
-
-
 // Router 33:- Add photo of student http://localhost:5050/api/students/add_student_photo
-router.post('/add_student_photo', fetchStudent, Students_Imgs.single("S_photo"), async (req, res) => {
+router.patch('/add_student_photo', fetchStudent, Students_Imgs.single("S_photo"), async (req, res) => {
     let success = false;
 
     if (!req.file || !req.file.filename) {
@@ -896,39 +854,47 @@ router.post('/add_student_photo', fetchStudent, Students_Imgs.single("S_photo"),
             return res.status(404).json({ success, error: "You should login first" })
         }
 
-        let student_images = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        if (student_images) {
-            success = false
+        const id = student._id
+        const new_t_img = {};
+        if (filename) { new_t_img.S_img = filename };
+
+        if (!student.S_img) {
+
+            s_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
+            const data = {
+                s_imgs: {
+                    id: s_imgs.id
+                }
+            }
+
+            const authtoken = jwt.sign(data, JWT_SECRET);
+            success = true;
+            res.status(200).json({ success, authtoken });
+
+        } else {
+
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
+            const filePath = dirname + '/Students_imgs/' + student.S_img;
+            fs.unlink(filePath, async (err) => {
                 if (err) {
                     success = false;
                     return res.status(404).json({ success, error: 'Error deleting file' });
+                } else {
+                    s_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
+
+                    const data = {
+                        s_imgs: {
+                            id: s_imgs.id
+                        }
+                    }
+
+                    const authtoken = jwt.sign(data, JWT_SECRET);
+                    success = true;
+                    res.status(200).json({ success, authtoken });
                 }
             });
-
-            return res.status(404).json({ success, error: "You have already uploaded your photo" })
         }
-
-        const S_img = filename
-        const S_icard_Id = student.S_icard_Id
-
-        let s_imgs = new StudentImg({
-            S_icard_Id, S_img
-        })
-
-        s_imgs = await s_imgs.save();
-        const data = {
-            s_imgs: {
-                id: s_imgs.id
-            }
-        }
-
-        const authtoken = jwt.sign(data, JWT_SECRET);
-        success = true;
-        res.status(200).json({ success, authtoken });
     }
     catch (error) {
         const dirPath = __dirname;
@@ -946,7 +912,7 @@ router.post('/add_student_photo', fetchStudent, Students_Imgs.single("S_photo"),
 
 
 // Router 35:- Add photo of student's father http://localhost:5050/api/students/add_student_father_photo
-router.post('/add_student_father_photo', fetchStudent, Students_Imgs.single("S_father_photo"), async (req, res) => {
+router.patch('/add_student_father_photo', fetchStudent, Students_Imgs.single("S_father_photo"), async (req, res) => {
     let success = false;
 
     if (!req.file || !req.file.filename) {
@@ -972,51 +938,46 @@ router.post('/add_student_father_photo', fetchStudent, Students_Imgs.single("S_f
             return res.status(404).json({ success, error: "You should login first" })
         }
 
-        let student_images = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        if (!student_images) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-            return res.status(404).json({ success, error: "Please add student photo first" })
-        }
+        const id = student._id
+        const new_t_img = {};
+        if (filename) { new_t_img.S_father_img = filename };
 
-        if (!student_images.S_father_img) {
-            const S_icard_Id = student_images.S_icard_Id
+        if (!student.S_father_img) {
 
-            const new_t_img = {};
-            if (filename) { new_t_img.S_father_img = filename };
-
-            const filter = { S_icard_Id: S_icard_Id };
-            s_imgs = await StudentImg.findOneAndUpdate(filter, { $set: new_t_img });
-
+            s_f_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
             const data = {
-                s_imgs: {
-                    id: s_imgs.id
+                s_f_imgs: {
+                    id: s_f_imgs.id
                 }
             }
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
             res.status(200).json({ success, authtoken });
+
         } else {
-            success = false
+
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
+            const filePath = dirname + '/Students_imgs/' + student.s_f_imgs;
+            fs.unlink(filePath, async (err) => {
                 if (err) {
                     success = false;
                     return res.status(404).json({ success, error: 'Error deleting file' });
+                } else {
+                    s_f_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
+
+                    const data = {
+                        s_f_imgs: {
+                            id: s_f_imgs.id
+                        }
+                    }
+
+                    const authtoken = jwt.sign(data, JWT_SECRET);
+                    success = true;
+                    res.status(200).json({ success, authtoken });
                 }
             });
-            return res.status(200).json({ success, error: "You have already uploaded your father's image" })
         }
     }
     catch (error) {
@@ -1035,7 +996,7 @@ router.post('/add_student_father_photo', fetchStudent, Students_Imgs.single("S_f
 
 
 // Router 36:- Add photo of student's mother http://localhost:5050/api/students/add_student_mother_photo
-router.post('/add_student_mother_photo', fetchStudent, Students_Imgs.single("S_mother_photo"), async (req, res) => {
+router.patch('/add_student_mother_photo', fetchStudent, Students_Imgs.single("S_mother_photo"), async (req, res) => {
     let success = false;
 
     if (!req.file || !req.file.filename) {
@@ -1061,323 +1022,47 @@ router.post('/add_student_mother_photo', fetchStudent, Students_Imgs.single("S_m
             return res.status(404).json({ success, error: "You should login first" })
         }
 
-        let student_images = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        if (!student_images) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-            return res.status(404).json({ success, error: "Please add student photo first" })
-        }
+        const id = student._id
+        const new_t_img = {};
+        if (filename) { new_t_img.S_mother_img = filename };
 
-        if (!student_images.S_mother_img) {
-            const S_icard_Id = student_images.S_icard_Id
+        if (!student.S_mother_img) {
 
-            const new_t_img = {};
-            if (filename) { new_t_img.S_mother_img = filename };
-
-            const filter = { S_icard_Id: S_icard_Id };
-            s_imgs = await StudentImg.findOneAndUpdate(filter, { $set: new_t_img });
-
+            s_m_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
             const data = {
-                s_imgs: {
-                    id: s_imgs.id
+                s_m_imgs: {
+                    id: s_m_imgs.id
                 }
             }
 
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
             res.status(200).json({ success, authtoken });
+
         } else {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-            return res.status(200).json({ success, error: "You have already uploaded your mother's image" })
-        }
-    }
-    catch (error) {
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + filename;
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            }
-        });
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 37:- fetch the image of students http://localhost:5050/api/students/fetch_img_of_student
-router.post('/fetch_img_of_student', fetchStudent, async (req, res) => {
-    let success = false;
-    try {
-        let student = await Students.findById(req.student.id)
-        if (!student) {
-            success = false
-            return res.status(404).json({ success, error: "You should login first" })
-        }
-
-        const s_imgs = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        res.status(200).json(s_imgs)
-    }
-    catch (error) {
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 38:- Edit photo of student http://localhost:5050/api/students/edit_student_photo/:{id}
-router.patch('/edit_student_photo/:id', fetchStudent, Students_Imgs.single("S_photo"), async (req, res) => {
-    let success = false;
-
-    if (!req.file || !req.file.filename) {
-        success = false;
-        return res.status(400).json({ success, error: "Please provide file" })
-    }
-    const { filename } = req.file;
-
-    try {
-        let student = await Students.findById(req.student.id)
-        if (!student) {
-            success = false
 
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
+            const filePath = dirname + '/Students_imgs/' + student.S_mother_img;
+            fs.unlink(filePath, async (err) => {
                 if (err) {
                     success = false;
                     return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
+                } else {
+                    s_m_imgs = await Students.findByIdAndUpdate(id, { $set: new_t_img });
 
-            return res.status(404).json({ success, error: "You should login first" })
-        }
-
-        let student_images = await StudentImg.findById(req.params.id)
-        if (!student_images) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-
-            return res.status(404).json({ success, error: "You can't update this photo" })
-        }
-
-        const new_t_img = {};
-        if (filename) { new_t_img.S_img = filename };
-
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + student_images.S_img;
-        fs.unlink(filePath, async (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            } else {
-                s_imgs = await StudentImg.findByIdAndUpdate(req.params.id, { $set: new_t_img });
-
-                const data = {
-                    s_imgs: {
-                        id: s_imgs.id
+                    const data = {
+                        s_m_imgs: {
+                            id: s_m_imgs.id
+                        }
                     }
-                }
 
-                const authtoken = jwt.sign(data, JWT_SECRET);
-                success = true;
-                res.status(200).json({ success, authtoken });
-            }
-        });
-    }
-    catch (error) {
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + filename;
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            }
-        });
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 39:- Edit photo of student's father http://localhost:5050/api/students/edit_photo_of_father_photo/:{id}
-router.patch('/edit_photo_of_father_photo/:id', fetchStudent, Students_Imgs.single("S_father_photo"), async (req, res) => {
-    let success = false;
-
-    if (!req.file || !req.file.filename) {
-        success = false;
-        return res.status(400).json({ success, error: "Please provide file" })
-    }
-    const { filename } = req.file;
-
-    try {
-        let student = await Students.findById(req.student.id)
-        if (!student) {
-            success = false
-
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
+                    const authtoken = jwt.sign(data, JWT_SECRET);
+                    success = true;
+                    res.status(200).json({ success, authtoken });
                 }
             });
-
-            return res.status(404).json({ success, error: "You should login first" })
         }
-
-        let student_images = await StudentImg.findById(req.params.id)
-        if (!student_images) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-
-            return res.status(404).json({ success, error: "You can't update this photo" })
-        }
-
-        const new_t_img = {};
-        if (filename) { new_t_img.S_father_img = filename };
-
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + student_images.S_father_img;
-        fs.unlink(filePath, async (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            } else {
-                s_imgs = await StudentImg.findByIdAndUpdate(req.params.id, { $set: new_t_img });
-
-                const data = {
-                    s_imgs: {
-                        id: s_imgs.id
-                    }
-                }
-
-                const authtoken = jwt.sign(data, JWT_SECRET);
-                success = true;
-                res.status(200).json({ success, authtoken });
-            }
-        });
-    }
-    catch (error) {
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + filename;
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            }
-        });
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 40:- Edit photo of student's mother http://localhost:5050/api/students/edit_photo_of_mother_photo/:{id}
-router.patch('/edit_photo_of_mother_photo/:id', fetchStudent, Students_Imgs.single("S_mother_photo"), async (req, res) => {
-    let success = false;
-
-    if (!req.file || !req.file.filename) {
-        success = false;
-        return res.status(400).json({ success, error: "Please provide file" })
-    }
-    const { filename } = req.file;
-
-    try {
-        let student = await Students.findById(req.student.id)
-        if (!student) {
-            success = false
-
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-
-            return res.status(404).json({ success, error: "You should login first" })
-        }
-
-        let student_images = await StudentImg.findById(req.params.id)
-        if (!student_images) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Students_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-
-            return res.status(404).json({ success, error: "You can't update this photo" })
-        }
-
-        const new_t_img = {};
-        if (filename) { new_t_img.S_mother_img = filename };
-
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Students_imgs/' + student_images.S_mother_img;
-        fs.unlink(filePath, async (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            } else {
-                s_imgs = await StudentImg.findByIdAndUpdate(req.params.id, { $set: new_t_img });
-
-                const data = {
-                    s_imgs: {
-                        id: s_imgs.id
-                    }
-                }
-
-                const authtoken = jwt.sign(data, JWT_SECRET);
-                success = true;
-                res.status(200).json({ success, authtoken });
-            }
-        });
     }
     catch (error) {
         const dirPath = __dirname;

@@ -24,8 +24,6 @@ const EventPhotos = require("../../Admin/Models/Upload_Event_Photos")
 const Result = require("../../Results/Model/Results")
 const Admin_complain_box = require("../../Admin/Models/Admin_complainBox")
 const Teacher_Imgs = require("../../Image_Middleware/Teacher_photo")
-const TeacherImg = require("../Models/Teacher_photo")
-const StudentImg = require("../../Students/Models/Students_photos")
 
 // Router 1:- Create teacher  http://localhost:5050/api/teachers/create_teacher
 router.post('/create_teacher', fetchadmin, [
@@ -1503,10 +1501,8 @@ router.post('/fetch_all_complains_of_admin', fetchTeachers, async (req, res) => 
     }
 })
 
-
-
 // Router 32:- Upload teacher photo http://localhost:5050/api/teachers/upload_img_of_teacher
-router.post('/upload_img_of_teacher', fetchTeachers, Teacher_Imgs.single("T_photo"), async (req, res) => {
+router.patch('/upload_img_of_teacher', fetchTeachers, Teacher_Imgs.single("T_photo"), async (req, res) => {
     let success = false;
 
     if (!req.file || !req.file.filename) {
@@ -1532,134 +1528,32 @@ router.post('/upload_img_of_teacher', fetchTeachers, Teacher_Imgs.single("T_phot
     }
 
     try {
+        const id = fetchTeacher._id
+        const new_t_img = {};
+        if (filename) { new_t_img.T_img = filename };
 
-        const T_imgs = await TeacherImg.findOne({ T_icard_Id: fetchTeacher.T_icard_Id })
-        if (T_imgs) {
-            success = false
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Teachers_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
+        if(!fetchTeacher.T_img){
+            edit_t_img = await Teachers.findByIdAndUpdate(id, { $set: new_t_img })
+    
+            const data = {
+                edit_t_img: {
+                    id: edit_t_img.id
                 }
-            });
-            return res.status(200).json({ success, error: "You have already uploaded your image" })
-        }
-
-        const T_img = filename
-        const T_icard_Id = fetchTeacher.T_icard_Id
-
-        let t_imgs = new TeacherImg({
-            T_icard_Id, T_img
-        })
-
-        t_imgs = await t_imgs.save();
-        const data = {
-            t_imgs: {
-                id: t_imgs.id
             }
-        }
-
-        const authtoken = jwt.sign(data, JWT_SECRET);
-        success = true;
-        res.status(200).json({ success, authtoken });
-
-    } catch (error) {
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Teachers_imgs/' + filename;
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            }
-        });
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 33:- fetch the image of teacher http://localhost:5050/api/teachers/fetch_img_of_teacher
-router.post('/fetch_img_of_teacher', fetchTeachers, async (req, res) => {
-    let success = false;
-    try {
-        let teacher = await Teachers.findById(req.teacher.id)
-        if (!teacher) {
-            success = false
-            return res.status(500).json({ success, error: "Youy should login first" })
-        }
-
-        const t_imgs = await TeacherImg.findOne({ T_icard_Id: teacher.T_icard_Id })
-        res.status(200).json(t_imgs)
-    }
-    catch (error) {
-
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 32:- Upload teacher photo http://localhost:5050/api/teachers/edit_img_of_teacher/{id}
-router.patch('/edit_img_of_teacher/:id', fetchTeachers, Teacher_Imgs.single("T_photo"), async (req, res) => {
-
-    let success = false;
-    if (!req.file || !req.file.filename) {
-        success = false;
-        return res.status(400).json({ success, error: "Please provide file" })
-    }
-    const { filename } = req.file;
-
-    const fetchTeacher = await Teachers.findById(req.teacher.id);
-    if (!fetchTeacher) {
-        success = false
-        const dirPath = __dirname;
-        const dirname = dirPath.slice(0, -16);
-        const filePath = dirname + '/Teachers_imgs/' + filename;
-        fs.unlink(filePath, (err) => {
-            if (err) {
-
-                success = false;
-                return res.status(404).json({ success, error: 'Error deleting file' });
-            }
-        });
-        return res.status(400).json({ success, error: "Sorry U should ligin first" })
-    }
-
-    try {
-
-        const T_imgs = await TeacherImg.findById(req.params.id)
-        if (!T_imgs) {
-            success = false
+    
+            const authtoken = jwt.sign(data, JWT_SECRET);
+            success = true;
+            res.status(200).json({ success, authtoken });
+        }else{
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Teachers_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-            return res.status(200).json({ success, error: "You can't delete this image" })
-        }
-
-        if (T_imgs.T_icard_Id == fetchTeacher.T_icard_Id) {
-
-            const new_t_img = {};
-            if (filename) { new_t_img.T_img = filename };
-
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Teachers_imgs/' + T_imgs.T_img;
-            fs.unlink(filePath, async(err) => {
+            const filePath = dirname + '/Teachers_imgs/' + fetchTeacher.T_img;
+            fs.unlink(filePath, async (err) => {
                 if (err) {
                     success = false;
                     return res.status(404).json({ success, error: 'Error deleting file' });
                 } else {
-                    edit_t_img = await TeacherImg.findByIdAndUpdate(req.params.id, { $set: new_t_img })
+                    edit_t_img = await Teachers.findByIdAndUpdate(id, { $set: new_t_img })
 
                     const data = {
                         edit_t_img: {
@@ -1672,22 +1566,8 @@ router.patch('/edit_img_of_teacher/:id', fetchTeachers, Teacher_Imgs.single("T_p
                     res.status(200).json({ success, authtoken });
                 }
             });
-
-
         }
-        else {
-            success = false;
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Teachers_imgs/' + filename;
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-            });
-            return res.status(404).json({ success, error: 'Please enter currect cridentials' });
-        }
+
 
     } catch (error) {
         const dirPath = __dirname;
@@ -1703,77 +1583,6 @@ router.patch('/edit_img_of_teacher/:id', fetchTeachers, Teacher_Imgs.single("T_p
     }
 })
 
-
-// Router 33:- Delete teacher photo http://localhost:5050/api/teachers/delete_img_of_teacher/{id}
-router.delete('/delete_img_of_teacher/:id', fetchTeachers, async (req, res) => {
-
-    const fetchTeacher = await Teachers.findById(req.teacher.id);
-    if (!fetchTeacher) {
-        success = false
-        return res.status(400).json({ success, error: "Sorry U should ligin first" })
-    }
-
-    try {
-
-        const T_imgs = await TeacherImg.findById(req.params.id)
-        if (!T_imgs) {
-            return res.status(400).json({ success, error: "data does'n exist" })
-        }
-
-
-        if (T_imgs.T_icard_Id == fetchTeacher.T_icard_Id) {
-            const dirPath = __dirname;
-            const dirname = dirPath.slice(0, -16);
-            const filePath = dirname + '/Teachers_imgs/' + T_imgs.T_img;
-            fs.unlink(filePath, async (err) => {
-                if (err) {
-
-                    success = false;
-                    return res.status(404).json({ success, error: 'Error deleting file' });
-                }
-                else {
-                    t_img = await TeacherImg.findByIdAndDelete(req.params.id)
-
-                    const data = {
-                        t_img: {
-                            id: t_img.id
-                        }
-                    }
-
-                    const authtoken = jwt.sign(data, JWT_SECRET);
-                    success = true;
-                    res.status(200).json({ success, authtoken });;
-                }
-            });
-        }
-        else {
-            success = false;
-            return res.status(404).json({ success, error: 'Please enter currect cridentials' });
-        }
-
-    } catch (error) {
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 34:- fetch the image of students http://localhost:5050/api/teachers/fetch_img_of_student
-router.post('/fetch_img_of_student', fetchTeachers, async (req, res) => {
-    let success = false;
-    try {
-        let teacher = await Teachers.findById(req.teacher.id)
-        if (!teacher) {
-            success = false
-            return res.status(500).json({ success, error: "Youy should login first" })
-        }
-
-        const s_imgs = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        res.status(200).json(s_imgs)
-    }
-    catch (error) {
-        res.status(500).send("some error occured");
-    }
-})
 
 
 module.exports = router

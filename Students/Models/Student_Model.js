@@ -35,6 +35,19 @@ const StudentsSchema = new Schema({
     S_Password: {
         type: String,
         require: true
+    },
+    S_img: {
+        type: String
+    },
+    S_father_img: {
+        type: String
+    },
+    S_mother_img: {
+        type: String
+    },
+    Date: {
+        type: Date,
+        default: Date.now()
     }
 });
 

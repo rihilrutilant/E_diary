@@ -32,9 +32,16 @@ const TeachersSchema = new Schema({
         type: String,
         require: true
     },
+    T_img: {
+        type: String,
+    },
     T_Password: {
         type: String,
         require: true
+    },
+    Date: {
+        type: Date,
+        default: Date.now()
     }
 });
 

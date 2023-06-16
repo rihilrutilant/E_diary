@@ -20,8 +20,6 @@ const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require("fs")
 const Admin_complain_box = require("../Models/Admin_complainBox")
-const TeacherImg = require("../../Teachers/Models/Teacher_photo")
-const StudentImg = require("../../Students/Models/Students_photos")
 
 
 
@@ -1122,47 +1120,6 @@ router.post('/fetch_all_complains', fetchadmin, [
     }
 })
 
-
-// Router 29:- fetch the image of teacher http://localhost:5050/api/admin/fetch_img_of_teacher
-router.post('/fetch_img_of_teacher', fetchadmin, [
-    body('T_icard_Id', 'Id should be atlest 6 char').isLength({ min: 6 })
-], async (req, res) => {
-    const { T_icard_Id } = req.body
-    let success = false;
-    try {
-        const admin = await Admin.findById(req.admin.id);
-        if (!admin) {
-            success = false
-            return res.status(400).json({ success, error: "Sorry U should login first" })
-        }
-
-        const t_imgs = await TeacherImg.findOne({ T_icard_Id: T_icard_Id })
-        res.status(200).json(t_imgs)
-    }
-    catch (error) {
-
-        res.status(500).send("some error occured");
-    }
-})
-
-
-// Router 30:- fetch the image of students http://localhost:5050/api/admin/fetch_img_of_student
-router.post('/fetch_img_of_student', fetchadmin, async (req, res) => {
-    let success = false;
-    try {
-        const admin = await Admin.findById(req.admin.id);
-        if (!admin) {
-            success = false
-            return res.status(400).json({ success, error: "Sorry U should login first" })
-        }
-
-        const s_imgs = await StudentImg.findOne({ S_icard_Id: student.S_icard_Id })
-        res.status(200).json(s_imgs)
-    }
-    catch (error) {
-        res.status(500).send("some error occured");
-    }
-})
 
 
 module.exports = router
