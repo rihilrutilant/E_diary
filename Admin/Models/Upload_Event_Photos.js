@@ -13,6 +13,7 @@ const EventPhotosSchema = new Schema({
     },
     Date: {
         type: Date,
+        format: 'YYYY-MM-DD',
         default: new Date
     }
 });

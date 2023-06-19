@@ -24,10 +24,12 @@ const HomeworkSchema = new Schema({
     },
     Homework_given_date: {
         type: Date, // Date should be in yyyy-mm-dd
+        format: 'YYYY-MM-DD',
         require: true
     },
     Homework_due_date: {
         type: Date, // Date should be in yyyy-mm-dd
+        format: 'YYYY-MM-DD',
         require: true
     },
     Date: {

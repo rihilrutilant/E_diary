@@ -20,6 +20,7 @@ const EventPhotos = require("../Models/Upload_Event_Photos")
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require("fs")
 const Admin_complain_box = require("../Models/Admin_complainBox")
+const Attendance = require('../../Attendance/Model/Attendance_Model')
 
 
 
@@ -1116,6 +1117,96 @@ router.post('/fetch_all_complains', fetchadmin, [
     }
     catch (error) {
 
+        res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 29:- fetch attendances by class code http://localhost:5050/api/admin/fetch_attendance_by_class_code
+router.post('/fetch_attendance_by_class_code', fetchadmin, [
+    body("Class_code", "Class code should be atlist 3 characters").isLength({ min: 3 })
+], async (req, res) => {
+    const { Class_code } = req.body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        success = false;
+        return res.status(400).json({ success, error: errors.array() });
+    }
+
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        success = false
+        return res.status(400).json({ success, error: "Sorry U should login first" })
+    }
+
+    const attendance = await Attendance.find({ Class_code: Class_code })
+    res.status(200).json(attendance)
+})
+
+
+// Router 30:- fetch all attendances that taken by teachers  http://localhost:5050/api/admin/filter_taken_attendance/{id}
+router.post('/filter_taken_attendance/:id', fetchadmin, async (req, res) => {
+    let success = false;
+
+    const admin = await Admin.findById(req.admin.id);
+    if (!admin) {
+        success = false
+        return res.status(400).json({ success, error: "Sorry U should login first" })
+    }
+    try {
+        let attend = await Attendance.findById(req.params.id);
+        if (!attend) {
+            success = false
+            return res.status(400).json({ success, error: "Data not found" })
+        }
+
+
+        const data = attend.Attend
+
+
+        const p = []
+        const a = []
+
+        data.forEach((attendObj) => {
+            Object.keys(attendObj).forEach(async (key) => {
+                const value = attendObj[key];
+                if (value == "true") {
+                    p.push(key)
+                } else {
+                    a.push(key)
+                }
+            });
+        });
+
+        const present = []
+
+        for (let index = 0; index < p.length; index++) {
+            const element = p[index];
+            const student = await Students.findOne({ S_icard_Id: element })
+
+            let s_name = student.S_name
+            present.push({ "Name": s_name, "S_Icard_Id": element })
+        }
+
+        const absent = []
+
+        for (let index = 0; index < a.length; index++) {
+            const element = a[index];
+            const student = await Students.findOne({ S_icard_Id: element })
+            let s_name = student.S_name
+            absent.push({ "Name": s_name, "S_Icard_Id": element })
+        }
+
+        const attendance = [
+            {
+                "present": present,
+                "absent": absent
+            }
+        ]
+
+        res.status(200).json(attendance);
+    } catch (error) {
+        console.error(error.message);
         res.status(500).send("some error occured");
     }
 })

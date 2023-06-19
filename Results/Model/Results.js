@@ -16,6 +16,7 @@ const Ressultschemas = new Schema({
   },
   Date: {
     type: String,
+      format: 'YYYY-MM-DD',
     require: true,
   },
   Term: {

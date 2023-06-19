@@ -17,6 +17,7 @@ const AttendanceSchema = new Schema({
     },
     Date: {
         type: Date,
+        format: 'YYYY-MM-DD',
         default: Date.now
     }
 });
