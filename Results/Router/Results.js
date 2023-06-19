@@ -15,7 +15,8 @@ const fs = require("fs")
 // Router 1:- Add results  http://localhost:5050/api/results/upload_results
 router.post('/upload_results', fetchadmin, Results_data.single("result_photos"), [
     body('S_icard_Id', 'Id should be atlist 6 characher').isLength({ min: 6 }),
-    body('Result_Title', 'Result title should be atlist 5 characher').isLength({ min: 5 })
+    body('Result_Title', 'Result title should be atlist 5 characher').isLength({ min: 5 }),
+    body('Term', 'Term title should be atlist 5 characher').isLength({ min: 5 }),
 ], async (req, res) => {
     let success = false;
     // If there are errors, return Bad request and the errors
@@ -40,7 +41,7 @@ router.post('/upload_results', fetchadmin, Results_data.single("result_photos"),
         return res.status(400).json({ success, error: errors.array() });
     }
 
-    const { S_icard_Id, Result_Title } = req.body;
+    const { S_icard_Id, Result_Title,Term } = req.body;
 
     const fetchAdmin = await Admin.findById(req.admin.id);
     if (!fetchAdmin) {
@@ -77,7 +78,7 @@ router.post('/upload_results', fetchadmin, Results_data.single("result_photos"),
         let Result_copy = filename;
 
         let results = new Result({
-            S_icard_Id, Result_Title, Result_copy
+            S_icard_Id, Result_Title, Result_copy, Term
         })
 
 
