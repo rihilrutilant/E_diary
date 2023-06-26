@@ -9,7 +9,7 @@ var jwt = require('jsonwebtoken');
 const fetchTeachers = require('../../Teachers/Middleware/Teacher_Middleware');
 const fetchStudents = require('../../Students/Middleware/Student_Middleware');
 const fetchAdmin = require("../../Admin/Middleware/Admin_Middleware");
-const Subjects = require('../../Admin/Models/Subjects_Models');
+// const Subjects = require('../../Admin/Models/Subjects_Models');
 const TimeTable = require("../Model/Timetable_Model")
 const Timetable_Imgs = require('../../Image_Middleware/Time_Table')
 require('dotenv').config()
