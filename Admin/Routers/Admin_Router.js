@@ -62,7 +62,6 @@ router.post('/admin_login', [
         res.status(200).json({ success, authtoken })
 
     } catch (error) {
-
         res.status(500).send("Internal Server Error");
     }
 });
@@ -233,6 +232,41 @@ router.post('/get_all_eventes', fetchadmin, async (req, res) => {
     } catch (error) {
 
         res.status(500).send("some error occured");
+    }
+})
+
+
+// Router 30:- fetch all attendances that taken by teachers  http://localhost:5050/api/admin/get_two_event
+
+router.post('/get_two_event', fetchadmin, async (req, res) => {
+    try {
+        const fetchAdmin = await Admin.findById(req.admin.id);
+        if (!fetchAdmin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry You Should Login First" })
+        }
+
+        const allevent = await Events.find();
+        const event = allevent.reverse()
+        const latest = []
+
+        if (allevent.length == 0) {
+            res.json("Data Not Found")
+        }
+        else {
+            if (event.length <= 2) {
+                res.json(event)
+            }
+            else {
+                for (let index = 0; index < 2; index++) {
+                    const element = event[index];
+                    latest.push(element)
+                }
+                res.json(latest)
+            }
+        }
+    } catch (error) {
+        res.status(500).send("Some Error Occured")
     }
 })
 
@@ -1210,7 +1244,5 @@ router.post('/filter_taken_attendance/:id', fetchadmin, async (req, res) => {
         res.status(500).send("some error occured");
     }
 })
-
-
 
 module.exports = router

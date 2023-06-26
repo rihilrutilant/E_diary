@@ -7,8 +7,7 @@ const TimetableSchema = new Schema({
         require: true
     },
     Daily_TimeTable: {
-        type: Array,
-        item: String,
+        type: String,
         require: true
     }
 });

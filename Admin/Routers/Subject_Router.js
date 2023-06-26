@@ -13,7 +13,7 @@ const Subjects = require("../Models/Subjects_Models")
 router.post('/create_subject', fetchadmin, [
     body('Standard', 'Standard should be atlist 2 character').isLength({ min: 2 }),
     body('Subject_Name', 'Subject name should be atlist 2 character').isLength({ min: 2 }),
-    body('Subject_Code', 'Class code should be atlist 5 character').isLength({ min: 5, max: 5 })
+    body('Subject_Code', 'Subject code should be atlist 5 character').isLength({ min: 5, max: 5 })
 ], async (req, res) => {
     let success = false;
     // If there are errors, return Bad request and the errors
@@ -92,5 +92,38 @@ router.post('/get_all_subjects_class_wise', fetchadmin, [
     }
 })
 
+// Router 3:- Delete the complain http://localhost:5050/api/subject/delete_subject/:{id}
+router.delete('/delete_subject/:id', fetchadmin, async (req, res) => {
+    const { id } = req.params;
+    let success = false;
+    try {
+        let subject = await Subjects.findById(req.params.id);
+        if (!subject) {
+            success = false;
+            return res.status(404).json({ success, error: "not found" })
+        }
+
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) {
+            success = false
+            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+        }
+
+        const subjectBox = await Subjects.findByIdAndDelete(id)
+
+        const data = {
+            subjectBox: {
+                id: subjectBox.id
+            }
+        }
+
+        const authtoken = jwt.sign(data, JWT_SECRET);
+        success = true;
+        res.status(200).json({ success, authtoken });;
+
+    } catch (error) {
+        res.status(500).send("some error occured");
+    }
+})
 
 module.exports = router
