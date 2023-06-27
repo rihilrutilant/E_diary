@@ -53,7 +53,8 @@ app.use("/event_photos", express.static("./Events_photos"));
 app.use("/result_data", express.static("./Result_data"))
 app.use("/teacher_img", express.static("./Teachers_imgs"))
 app.use("/student_img", express.static("./Students_imgs"))
-app.use("/time_table",express.static("./TimeTable_imgs"))
+app.use("/time_table", express.static("./TimeTable_imgs"))
+app.use("/exam_time_table", express.static("./Exam_TimeTable_imgs"))
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
