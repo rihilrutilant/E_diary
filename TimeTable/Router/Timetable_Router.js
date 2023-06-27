@@ -273,10 +273,6 @@ router.post('/fetch_all_timetable_by_classes', fetchAdmin, [
     try {
 
         let timetable = await TimeTable.findOne({ Class_code: Class_code })
-        if (!timetable) {
-            success = false
-            return res.status(200).json({ success, error: "not found" })
-        }
         res.status(200).json(timetable);
     } catch (error) {
         res.status(500).send("some error occured");
@@ -388,11 +384,6 @@ router.post('/fetch_timetable_for_students', fetchStudents, async (req, res) => 
     try {
 
         let timetable = await TimeTable.findOne({ Class_code: fetchsrudent.S_Class_code })
-        if (!timetable) {
-            success = false
-            return res.status(400).json({ success, error: "not found" })
-        }
-
         res.status(200).json(timetable);
 
     } catch (error) {
@@ -490,12 +481,7 @@ router.post('/fetch_all_lectures_of_the_teachers', fetchTeachers, [
     }
 
     try {
-
         let timetable = await TimeTable.findOne({ Class_code: Class_code })
-        if (!timetable) {
-            success = false
-            return res.status(200).json({ success, error: "not found" })
-        }
         res.status(200).json(timetable);
     } catch (error) {
         res.status(500).send("some error occured");

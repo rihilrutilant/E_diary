@@ -11,8 +11,9 @@ const ExamTimeTableSchema = new Schema({
         require: true
     },
     Exam_TimeTable: {
-        type: Array,
-        item: String,
+        // type: Array,
+        // item: String,
+        type: String,
         require: true
     }
 });

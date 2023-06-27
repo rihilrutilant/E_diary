@@ -11,6 +11,8 @@ const fetchStudents = require('../../Students/Middleware/Student_Middleware');
 const fetchAdmin = require("../../Admin/Middleware/Admin_Middleware");
 const Subjects = require('../../Admin/Models/Subjects_Models');
 const ExamTimeTable = require("../Model/Exam_TimeTable_Model")
+const Exam_Timetable_Imgs = require("../../Image_Middleware/Exam_timetable")
+const fs = require('fs')
 const moment = require('moment');
 require('dotenv').config()
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -22,103 +24,72 @@ const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/;
 
 
 // Router :- 1  set exam timetable  http://localhost:5050/api/examtimetable/set_examtimetable
-router.post('/set_examtimetable', fetchAdmin, [
+router.post('/set_examtimetable', fetchAdmin, Exam_Timetable_Imgs.single('exam_tt_img'), [
     body("Standard", "Standard should be atlist 2 characters").isLength({ min: 2, max: 2 }),
     body("Exam_Type", "Exam_Type should be atlist 3 characters").isLength({ min: 3 }),
-    body("Exam_TimeTable", "Please enter the timetable").isArray(),
 ], async (req, res) => {
+    let success = false;
+
+    if (!req.file || !req.file.filename) {
+        success = false;
+        return res.status(400).json({ success, error: "Please provide file" })
+    }
+    const { filename } = req.file
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         success = false;
+
+        const dirPath = __dirname;  //C:\Users\admin\Desktop\E_diary\Exam_TimeTable\Router
+        const dirname = dirPath.slice(0, -22);
+        const filePath = dirname + '/Exam_TimeTable_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
+
         return res.status(400).json({ success, error: errors.array() });
     }
-    const { Standard, Exam_Type, Exam_TimeTable } = req.body
+    const { Standard, Exam_Type } = req.body
     try {
 
         const fetchadmin = await Admin.findById(req.admin.id);
         if (!fetchadmin) {
             success = false
+            const dirPath = __dirname;  //C:\Users\admin\Desktop\E_diary\Exam_TimeTable\Router
+            const dirname = dirPath.slice(0, -22);
+            const filePath = dirname + '/Exam_TimeTable_imgs/' + filename;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
             return res.status(400).json({ success, error: "Sorry U should ligin first" })
         }
 
         const standard = await Classes.findOne({ Standard: Standard })
         if (!standard) {
             success = false
+            const dirPath = __dirname;  //C:\Users\admin\Desktop\E_diary\Exam_TimeTable\Router
+            const dirname = dirPath.slice(0, -22);
+            const filePath = dirname + '/Exam_TimeTable_imgs/' + filename;
+            fs.unlink(filePath, (err) => {
+                if (err) {
+
+                    success = false;
+                    return res.status(404).json({ success, error: 'Error deleting file' });
+                }
+            });
             return res.status(400).json({ success, error: "Sorry this standard does not exist" })
         }
 
-        const sub = []
-        Exam_TimeTable.forEach(item => {
-            sub.push(item.Subject_code)
 
-            // check the given time is in valide formate
-            const isValidDate = moment(item.Date, format).isValid();
-            if (isValidDate == false) {
-                success = false
-                return res.status(400).json({ success, error: "Invalid date format" })
-            }
-
-
-            // check the given time is in valide formater
-            let StartTime = item.StartTime
-            if (timeRegex.test(StartTime)) {
-                const [time, period] = StartTime.split(" ");
-                const [hours, minutes] = time.split(":");
-
-                // Convert hours to a number and adjust for AM/PM period
-                let parsedHours = parseInt(hours);
-                if (period === "PM" && parsedHours !== 12) {
-                    parsedHours += 12;
-                } else if (period === "AM" && parsedHours === 12) {
-                    parsedHours = 0;
-                }
-
-                // Check if the parsed hours and minutes are within the valid range
-                if (parsedHours >= 0 && parsedHours < 24 && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
-
-                } else {
-                    success = false
-                    return res.status(400).json({ success, error: "Invalid time" })
-                }
-            } else {
-                success = false
-                return res.status(400).json({ success, error: "Invalid time format" })
-            }
-
-            let EndTime = item.EndTime
-            if (timeRegex.test(EndTime)) {
-                const [time, period] = EndTime.split(" ");
-                const [hours, minutes] = time.split(":");
-
-                // Convert hours to a number and adjust for AM/PM period
-                let parsedHours = parseInt(hours);
-                if (period === "PM" && parsedHours !== 12) {
-                    parsedHours += 12;
-                } else if (period === "AM" && parsedHours === 12) {
-                    parsedHours = 0;
-                }
-
-                // Check if the parsed hours and minutes are within the valid range
-                if (parsedHours >= 0 && parsedHours < 24 && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
-
-                } else {
-                    success = false
-                    return res.status(400).json({ success, error: "Invalid time" })
-                }
-            } else {
-                success = false
-                return res.status(400).json({ success, error: "Invalid time format" })
-            }
-        });
-
-        for (let index = 0; index < sub.length; index++) {
-            const element = sub[index];
-            let check = await Subjects.findOne({ Subject_Code: element })
-            if (check.Standard != Standard) {
-                success = false
-                return res.status(400).json({ success, error: "Please choose correct subject code" })
-            }
-        }
+        const Exam_TimeTable = filename
 
         let examtimetable = new ExamTimeTable({
             Standard, Exam_Type, Exam_TimeTable
@@ -133,8 +104,18 @@ router.post('/set_examtimetable', fetchAdmin, [
 
         const authtoken = jwt.sign(data, JWT_SECRET);
         success = true;
-        res.status(200).json({ success, authtoken });;
+        res.status(200).json({ success, authtoken });
     } catch (err) {
+        const dirPath = __dirname;  //C:\Users\admin\Desktop\E_diary\Exam_TimeTable\Router
+        const dirname = dirPath.slice(0, -22);
+        const filePath = dirname + '/Exam_TimeTable_imgs/' + filename;
+        fs.unlink(filePath, (err) => {
+            if (err) {
+
+                success = false;
+                return res.status(404).json({ success, error: 'Error deleting file' });
+            }
+        });
         return res.status(500).json({ message: "Internal server error" });
     }
 })
