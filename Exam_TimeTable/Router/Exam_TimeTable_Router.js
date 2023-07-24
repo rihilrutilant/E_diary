@@ -15,9 +15,6 @@ const fs = require('fs')
 require('dotenv').config()
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
-
-
 // Router :- 1  set exam timetable  http://localhost:5050/api/examtimetable/set_examtimetable
 router.post('/set_examtimetable', fetchAdmin, Exam_Timetable_Imgs.single('exam_tt_img'), [
     body("Standard", "Standard should be atlist 2 characters").isLength({ min: 2, max: 2 }),
@@ -166,7 +163,6 @@ router.patch('/edit_examtimetable/:id', fetchAdmin, Exam_Timetable_Imgs.single('
         const filePath = dirname + '/Exam_TimeTable_imgs/' + filename;
         fs.unlink(filePath, (err) => {
             if (err) {
-
                 success = false;
                 return res.status(404).json({ success, error: 'Error deleting file' });
             }
