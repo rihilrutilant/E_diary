@@ -11,6 +11,10 @@ ConnectToMongodb();
 app.use(cors());
 app.use(express.json());
 
+app.get('/',(req, res) => {
+  res.send("Hello")
+})
+
 // Admin
 app.use("/api/admin", require("./Admin/Routers/Admin_Router"));
 app.use("/api/noticeBord", require("./Admin/Routers/Notice_bord"));
