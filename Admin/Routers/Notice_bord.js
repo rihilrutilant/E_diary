@@ -18,6 +18,7 @@ router.post('/send_notice', fetchadmin, noticeAttach.single("notice_attach"), [
     body('Notice_description', 'Decription should be atlest 10 char').isLength({ min: 10 }),
     body('Group', 'Please Chooes the group').isLength({ min: 2 }),
 ], async (req, res) => {
+	console.log("yes");
     let success = false;
     // If there are errors, return Bad request and the errors
     if (!req.file || !req.file.filename) {

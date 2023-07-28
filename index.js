@@ -8,7 +8,10 @@ dotenv.config();
 const port = process.env.PORT || 5050;
 
 ConnectToMongodb();
-app.use(cors());
+//app.use(cors());
+app.use(cors({
+  credentials: true,
+}));
 app.use(express.json());
 
 app.get('/',(req, res) => {

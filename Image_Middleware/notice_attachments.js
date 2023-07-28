@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // Set the destination folder where the files will be stored
-        const uploadPath = 'Notices/';
+        const uploadPath = __dirname + '/../Notices/';
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath);
         }
