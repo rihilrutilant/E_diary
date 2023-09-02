@@ -245,7 +245,7 @@ router.post('/attendance_history_of_students', fetchStudents, async (req, res) =
     }
 })
 
-router.post('/demo_attendance', upload.single('sheet'), (req, res, next) => {
+router.post('/excel_attandence', upload.single('sheet'), (req, res, next) => {
     csv()
         .fromFile(req.file.path)
         .then((jsonObj) => {
@@ -291,7 +291,7 @@ router.post('/demo_attendance', upload.single('sheet'), (req, res, next) => {
         })
 });
 
-router.get('/demo_attendance_fetch', async (req, res, next) => {
+router.get('/excel_attandence_fetch', async (req, res, next) => {
     try {
         const attendanceData = await Demo_Attendance.aggregate([
             {
@@ -307,7 +307,7 @@ router.get('/demo_attendance_fetch', async (req, res, next) => {
     }
 });
 
-router.get('/demo_attendance_status', async (req, res, next) => {
+router.get('/excel_attandence_status', async (req, res, next) => {
     try {
         const data = await Students.aggregate([
             {
