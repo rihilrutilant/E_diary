@@ -313,7 +313,7 @@ router.post('/fetch_complains_of_teacher', fetchTeachers, async (req, res) => {
         const fetchTeacher = await Teachers.findById(req.teacher.id);
         if (!fetchTeacher) {
             success = false
-            return res.status(400).json({ success, error: "Sorry U should ligin first" })
+            return res.status(400).json({ success, error: "Sorry U should login first" })
         }
 
         const allcomplains = await Teacher_complain_box.find({ T_icard_Id: fetchTeacher.T_icard_Id })

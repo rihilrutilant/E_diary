@@ -4,6 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const fetchadmin = (req, res, next) => {
   const token = req.header("authToken_admin");
+  console.log(token);
   if (!token) {
     res.status(401).send({ error: "Please authenticate using a valid token " });
   }

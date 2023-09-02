@@ -11,10 +11,11 @@ ConnectToMongodb();
 //app.use(cors());
 app.use(cors({
   credentials: true,
+  origin: "*"
 }));
 app.use(express.json());
 
-app.get('/',(req, res) => {
+app.get('/', (req, res) => {
   res.send("Hello")
 })
 

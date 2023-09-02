@@ -11,6 +11,13 @@ const fetchStudents = require('../../Students/Middleware/Student_Middleware');
 require('dotenv').config()
 const JWT_SECRET = process.env.JWT_SECRET;
 
+const multer = require("multer")
+const csv = require('csvtojson');
+const path = require("path")
+const upload = multer({ dest: path.join(__dirname, '../uploads') });
+const Demo_Attendance = require("../Model/Demo_Attendance");
+const fetchadmin = require('../../Admin/Middleware/Admin_Middleware');
+
 // Router 1:- Take attendance of the students  http://localhost:5050/api/attendance/take_attendance
 router.post('/take_attendance', fetchTeachers, [
     body("Class_code", "Class code should be atlist 3 characters").isLength({ min: 3 }),
@@ -237,6 +244,100 @@ router.post('/attendance_history_of_students', fetchStudents, async (req, res) =
         res.status(500).send("some error occured");
     }
 })
+
+router.post('/demo_attendance', upload.single('sheet'), (req, res, next) => {
+    csv()
+        .fromFile(req.file.path)
+        .then((jsonObj) => {
+            var army = [];
+            for (var i = 0; i < jsonObj.length; i++) {
+                var obj = {};
+                obj.EmployeeCode = jsonObj[i]['EmployeeCode']
+                obj.EmployeeName = jsonObj[i]['EmployeeName']
+                obj.DeviceCode = jsonObj[i]['DeviceCode']
+                obj.Company = jsonObj[i]['Company']
+                obj.Department = jsonObj[i]['Department']
+                obj.Location = jsonObj[i]['Location']
+                obj.Designation = jsonObj[i]['Designation']
+                obj.Grade = jsonObj[i]['Grade']
+                obj.Team = jsonObj[i]['Team']
+                obj.Category = jsonObj[i]['Category']
+                obj.EmploymentType = jsonObj[i]['EmploymentType']
+                obj.Gender = jsonObj[i]['Gender']
+                obj.DOJ = jsonObj[i]['DOJ']
+                obj.DOC = jsonObj[i]['DOC']
+                obj.CardNumber = jsonObj[i]['CardNumber']
+                obj.ShiftRoaster = jsonObj[i]['ShiftRoaster']
+                obj.Status = jsonObj[i]['Status']
+                obj.DOR = jsonObj[i]['DOR']
+                obj.uploadDate = req.body.uploadDate
+                army.push(obj);
+            }
+            Demo_Attendance.insertMany(army).then(function () {
+                res.status(200).send({
+                    message: "Successfully Uploaded!"
+                });
+            }).catch(function (error) {
+                res.status(500).send({
+                    message: "failure",
+                    error
+                });
+            });
+        }).catch((error) => {
+            res.status(500).send({
+                message: "failure",
+                error
+            });
+        })
+});
+
+router.get('/demo_attendance_fetch', async (req, res, next) => {
+    try {
+        const attendanceData = await Demo_Attendance.aggregate([
+            {
+                $sort: {
+                    uploadDate: -1
+                }
+            }
+        ])
+        return res.status(200).json({ success: "Success", data: attendanceData })
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("some error occured");
+    }
+});
+
+router.get('/hello', async (req, res, next) => {
+    try {
+        const data = await Students.aggregate([
+            {
+                $lookup: {
+                    from: "demoattendances",
+                    localField: "S_icard_Id",
+                    foreignField: "EmployeeCode",
+                    as: "result",
+                }
+            },
+            {
+                $addFields: {
+                    attendancesStatus: { $ne: ['$result', []] }
+                }
+            },
+            {
+                $project: {
+                    S_icard_Id: 1,
+                    S_name: 1,
+                    Department : "$result.Department",
+                    attendancesStatus: 1
+                }
+            }
+        ])
+        return res.status(200).json({ success: "Success", data })
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("some error occured");
+    }
+});
 
 
 module.exports = router
