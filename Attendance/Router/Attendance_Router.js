@@ -307,7 +307,7 @@ router.get('/demo_attendance_fetch', async (req, res, next) => {
     }
 });
 
-router.get('/hello', async (req, res, next) => {
+router.get('/demo_attendance_status', async (req, res, next) => {
     try {
         const data = await Students.aggregate([
             {
