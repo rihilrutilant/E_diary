@@ -11,12 +11,10 @@ const fetchStudents = require('../../Students/Middleware/Student_Middleware');
 require('dotenv').config()
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const multer = require("multer")
 const csv = require('csvtojson');
-const path = require("path")
-const upload = multer({ dest: path.join(__dirname, '../uploads') });
 const Demo_Attendance = require("../Model/Demo_Attendance");
 const fetchadmin = require('../../Admin/Middleware/Admin_Middleware');
+const Excel_Files = require('../../Image_Middleware/Event_photos');
 
 // Router 1:- Take attendance of the students  http://localhost:5050/api/attendance/take_attendance
 router.post('/take_attendance', fetchTeachers, [
@@ -245,7 +243,7 @@ router.post('/attendance_history_of_students', fetchStudents, async (req, res) =
     }
 })
 
-router.post('/excel_attandence', upload.single('sheet'), (req, res, next) => {
+router.post('/excel_attandence', Excel_Files.single("sheet"), (req, res, next) => {
     csv()
         .fromFile(req.file.path)
         .then((jsonObj) => {
@@ -327,7 +325,7 @@ router.get('/excel_attandence_status', async (req, res, next) => {
                 $project: {
                     S_icard_Id: 1,
                     S_name: 1,
-                    Department : "$result.Department",
+                    Department: "$result.Department",
                     attendancesStatus: 1
                 }
             }

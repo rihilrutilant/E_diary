@@ -1,13 +1,12 @@
 const multer = require('multer');
 const fs = require('fs');
-const path = require("path")
 const { v4: uuidv4 } = require('uuid');
-console.log(path.join(__dirname,'../Attendance/uploads'));
+
 // Create multer storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // Set the destination folder where the files will be stored
-        const uploadPath = path.join(__dirname, '../Attendance/uploads');
+        const uploadPath = __dirname + '/../Events_photos/';
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath);
         }
@@ -21,6 +20,6 @@ const storage = multer.diskStorage({
     }
 });
 
-const Excel_Files = multer({ storage });
+const Events_photoes = multer({ storage });
 
-module.exports = Excel_Files
+module.exports = Events_photoes
