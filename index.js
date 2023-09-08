@@ -11,7 +11,6 @@ ConnectToMongodb();
 //app.use(cors());
 app.use(cors({
   credentials: true,
-  origin: "*"
 }));
 app.use(express.json());
 

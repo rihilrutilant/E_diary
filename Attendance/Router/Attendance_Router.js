@@ -294,7 +294,7 @@ router.get('/excel_attandence_fetch', async (req, res, next) => {
         const attendanceData = await Demo_Attendance.aggregate([
             {
                 $sort: {
-                    uploadDate: -1
+                    uploadDate: -1,
                 }
             }
         ])
