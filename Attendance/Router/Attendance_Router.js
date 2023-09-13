@@ -243,7 +243,7 @@ router.post('/attendance_history_of_students', fetchStudents, async (req, res) =
     }
 })
 
-router.post('/excel_attandence', Excel_Files.single("sheet"), (req, res, next) => {
+router.post('/excel_attandence', Excel_Files.single("sheet"), fetchadmin, (req, res, next) => {
     csv()
         .fromFile(req.file.path)
         .then((jsonObj) => {
@@ -289,7 +289,7 @@ router.post('/excel_attandence', Excel_Files.single("sheet"), (req, res, next) =
         })
 });
 
-router.get('/excel_attandence_fetch', async (req, res, next) => {
+router.get('/excel_attandence_fetch', fetchadmin, async (req, res, next) => {
     try {
         const attendanceData = await Demo_Attendance.aggregate([
             {
@@ -305,9 +305,14 @@ router.get('/excel_attandence_fetch', async (req, res, next) => {
     }
 });
 
-router.get('/excel_attandence_status', async (req, res, next) => {
+router.get('/excel_attandence_status', fetchTeachers, async (req, res, next) => {
     try {
         const data = await Students.aggregate([
+            {
+                $match: {
+                    S_Class_code: req.teacher.class_code,
+                }
+            },
             {
                 $lookup: {
                     from: "demoattendances",
@@ -324,6 +329,7 @@ router.get('/excel_attandence_status', async (req, res, next) => {
             {
                 $project: {
                     S_icard_Id: 1,
+                    S_Class_code: 1,
                     S_name: 1,
                     Department: "$result.Department",
                     attendancesStatus: 1

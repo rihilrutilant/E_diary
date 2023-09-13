@@ -111,7 +111,6 @@ router.post('/teachers_login', [
     body('T_Password', 'Password should be atlest 6 char').isLength({ min: 6 })
 ], async (req, res) => {
     let success = false;
-    // If there are errors, return Bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         success = false;
@@ -129,7 +128,8 @@ router.post('/teachers_login', [
         if (t_icard_id.T_Password == T_Password) {
             const data = {
                 teachers: {
-                    id: t_icard_id.id
+                    id: t_icard_id.id,
+                    class_code: t_icard_id.T_Class_code,
                 }
             }
 
@@ -1532,19 +1532,19 @@ router.patch('/upload_img_of_teacher', fetchTeachers, Teacher_Imgs.single("T_pho
         const new_t_img = {};
         if (filename) { new_t_img.T_img = filename };
 
-        if(!fetchTeacher.T_img){
+        if (!fetchTeacher.T_img) {
             edit_t_img = await Teachers.findByIdAndUpdate(id, { $set: new_t_img })
-    
+
             const data = {
                 edit_t_img: {
                     id: edit_t_img.id
                 }
             }
-    
+
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
             res.status(200).json({ success, authtoken });
-        }else{
+        } else {
             const dirPath = __dirname;
             const dirname = dirPath.slice(0, -16);
             const filePath = dirname + '/Teachers_imgs/' + fetchTeacher.T_img;
